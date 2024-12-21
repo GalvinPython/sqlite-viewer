@@ -3,19 +3,31 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background-color: #f9fafb;
+  --text-color: #1f2937;
+  --table-header-bg: #e5e7eb;
+  --table-row-hover-bg: #f3f4f6;
+  --button-bg: #3b82f6;
+  --button-hover-bg: #2563eb;
+  --button-text-color: #ffffff;
+  --upload-box-bg: #f4f5f7;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background-color: #111;
+    --text-color: #d1d5db;
+    --table-header-bg: #1e293b;
+    --table-row-hover-bg: #273449;
+    --button-bg: #1d4ed8;
+    --button-hover-bg: #153e75;
+    --button-text-color: #ffffff;
+    --upload-box-bg: #1f2937;
   }
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
 }

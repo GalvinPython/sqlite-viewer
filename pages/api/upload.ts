@@ -1,26 +1,23 @@
-// TODO: Add error handling for SQLite database read
 // TODO: Security considerations for file uploads
-// TODO: Delete uploaded files after reading data
 
 import fs from "fs";
 import path from "path";
 
 import { NextApiRequest, NextApiResponse } from "next";
 import multer from "multer";
-import { Database } from "bun:sqlite";
+import sqlite3 from "sqlite3";
 
 // Temporary directory where uploaded files are stored
 const tmpDir = path.join(process.cwd(), "tmp");
 
-// Ensure tmp directory exists
 if (!fs.existsSync(tmpDir)) {
     fs.mkdirSync(tmpDir);
 }
 
 // Configure multer storage
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, tmpDir),
-    filename: (req, file, cb) => cb(null, file.originalname),
+    destination: (_req, _file, cb) => cb(null, tmpDir),
+    filename: (_req, file, cb) => cb(null, file.originalname),
 });
 
 const upload = multer({ storage });
@@ -51,7 +48,9 @@ export default async function handler(
             const file = (req as any).file;
 
             if (!file) {
-                return res.status(400).json({ error: "No file uploaded" });
+                res.status(400).json({ error: "No file uploaded" });
+
+                return;
             }
 
             // Rename file with random hash
@@ -64,26 +63,70 @@ export default async function handler(
             fs.renameSync(file.path, filePath);
 
             // Read SQLite data
-            const tempDb = new Database(filePath);
-            const tables = tempDb
-                .query("SELECT name FROM sqlite_master WHERE type='table'")
-                .all() as { name: string }[];
+            const tempDb = new sqlite3.Database(filePath);
             const dbData: { [key: string]: any[] } = {};
 
-            tables.forEach((table: { name: string }) => {
-                const rows = tempDb.query(`SELECT * FROM ${table.name}`).all();
+            const getTables = () =>
+                new Promise<{ name: string }[]>((resolve, reject) => {
+                    tempDb.all(
+                        "SELECT name FROM sqlite_master WHERE type='table'",
+                        (err, tables) => {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve(tables as { name: string }[]);
+                            }
+                        },
+                    );
+                });
 
-                dbData[table.name] = rows;
-            });
+            const getTableData = (tableName: string) =>
+                new Promise<any[]>((resolve, reject) => {
+                    tempDb.all(`SELECT * FROM ${tableName}`, (err, rows) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(rows);
+                        }
+                    });
+                });
 
-            return res.status(200).json(dbData);
+            try {
+                const tables = await getTables();
+
+                for (const table of tables) {
+                    dbData[table.name] = await getTableData(table.name);
+                }
+
+                // Delete uploaded file
+                await new Promise<void>((resolve, reject) => {
+                    tempDb.close((closeErr) => {
+                        if (closeErr) {
+                            reject(closeErr);
+                        } else {
+                            resolve();
+                        }
+                    });
+                });
+
+                fs.unlinkSync(filePath);
+                res.status(200).json(dbData);
+            } catch (err) {
+                throw err;
+            }
+
+            return;
         } catch (error) {
             console.error(error);
 
-            return res.status(500).json({ error: "File upload failed" });
+            res.status(500).json({ error: "File upload failed" });
+
+            return;
         }
     } else {
-        return res.status(405).json({ error: "Method not allowed" });
+        res.status(405).json({ error: "Method not allowed" });
+
+        return;
     }
 }
 
