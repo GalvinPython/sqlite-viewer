@@ -1,11 +1,10 @@
-// TODO: Security considerations for file uploads
-
 import fs from "fs";
 import path from "path";
 
 import { NextApiRequest, NextApiResponse } from "next";
 import multer from "multer";
 import sqlite3 from "sqlite3";
+import rateLimit from "express-rate-limit";
 
 // Temporary directory where uploaded files are stored
 const tmpDir = path.join(process.cwd(), "tmp");
@@ -36,13 +35,40 @@ function runMiddleware(
     });
 }
 
+// Set up rate-limiting
+const limiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 10, // Limit each IP to 10 requests per windowMs
+    message: { error: "Too many requests, please try again later." },
+    keyGenerator: (req) => {
+        const ip =
+            req.headers["x-forwarded-for"] ||
+            req.socket.remoteAddress ||
+            req.headers["cf-connecting-ip"] ||
+            "";
+
+        return Array.isArray(ip) ? ip[0] : ip;
+    },
+});
+
+// Helper function to run the rate-limiter middleware
+async function runRateLimiter(req: NextApiRequest, res: NextApiResponse) {
+    await new Promise<void>((resolve, reject) => {
+        limiter(req as any, res as any, (result: any) => {
+            if (result instanceof Error) reject(result);
+            resolve();
+        });
+    });
+}
+
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse,
 ) {
-    if (req.method === "POST") {
-        try {
-            // Run multer middleware
+    try {
+        await runRateLimiter(req, res);
+
+        if (req.method === "POST") {
             await runMiddleware(req, res, uploadMiddleware);
 
             const file = (req as any).file;
@@ -116,15 +142,21 @@ export default async function handler(
             }
 
             return;
-        } catch (error) {
-            console.error(error);
-
-            res.status(500).json({ error: "File upload failed" });
+        } else {
+            res.status(405).json({ error: "Method not allowed" });
 
             return;
         }
-    } else {
-        res.status(405).json({ error: "Method not allowed" });
+    } catch (error) {
+        console.error(error);
+
+        if ((error as any).status === 429) {
+            res.status(429).json({
+                error: "Too many requests, please try again later.",
+            });
+        } else {
+            res.status(500).json({ error: "File upload failed" });
+        }
 
         return;
     }

@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { SiSqlite, SiGithub } from "react-icons/si";
+import { FaCloudUploadAlt, FaDatabase } from "react-icons/fa";
 
 interface TabsProps {
     tabs: string[];
@@ -58,6 +60,18 @@ export default function Home() {
 
         if (file.size > 50 * 1024 * 1024) {
             return alert("File size exceeds the 50MB limit.");
+        }
+
+        const fileExtension = file.name.split(".").pop()?.toLowerCase();
+
+        if (
+            fileExtension !== "db" &&
+            fileExtension !== "sqlite" &&
+            fileExtension !== "sqlite3"
+        ) {
+            return alert(
+                "Invalid file type. Please upload a .db, .sqlite, or .sqlite3 file.",
+            );
         }
 
         const formData = new FormData();
@@ -134,33 +148,38 @@ export default function Home() {
         <div
             className="min-h-screen p-8"
             style={{
-                backgroundColor: "var(--background-color)",
+                // backgroundColor: "var(--background-color)",
                 color: "var(--text-color)",
             }}
         >
             <header className="flex flex-col items-center gap-6 mb-8">
-                <h1 className="text-2xl font-semibold">
-                    SQLite Database Visualizer
+                <h1 className="text-2xl font-semibold flex items-center gap-2">
+                    <SiSqlite />
+                    SQLite Reader
                 </h1>
                 <a
-                    className="hover:underline"
+                    className="px-4 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2"
                     href="https://github.com/GalvinPython/sqlite-viewer"
                     rel="noopener noreferrer"
-                    style={{ color: "var(--button-bg)" }}
+                    style={{
+                        backgroundColor: "var(--button-bg)",
+                        color: "var(--button-text-color)",
+                    }}
                     target="_blank"
                 >
+                    <SiGithub />
                     View on GitHub
                 </a>
             </header>
 
             <div className="flex justify-center mb-12">
                 <div
-                    className="w-full max-w-lg p-6 shadow rounded-lg "
+                    className="w-full max-w-3xl p-6 shadow rounded-lg"
                     style={{
                         backgroundColor: "var(--upload-box-bg)",
                     }}
                 >
-                    <h2 className="text-lg font-semibold mb-4">
+                    <h2 className="text-lg text-center font-semibold mb-4">
                         Upload SQLite File
                     </h2>
                     <div className="flex flex-col items-center gap-4">
@@ -173,13 +192,14 @@ export default function Home() {
                         />
 
                         <label
-                            className="px-6 py-2 rounded cursor-pointer hover:bg-blue-600 transition"
+                            className="px-6 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2"
                             htmlFor="file-upload"
                             style={{
                                 backgroundColor: "var(--button-bg)",
                                 color: "var(--button-text-color)",
                             }}
                         >
+                            <FaDatabase />
                             Choose File
                         </label>
                         {file && (
@@ -191,13 +211,14 @@ export default function Home() {
                             </p>
                         )}
                         <button
-                            className="px-6 py-2 rounded hover:bg-blue-600 transition gap-6 mb-8"
+                            className="px-6 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2 mb-4"
                             style={{
                                 backgroundColor: "var(--button-bg)",
                                 color: "var(--button-text-color)",
                             }}
                             onClick={handleUpload}
                         >
+                            <FaCloudUploadAlt />
                             Upload File
                         </button>
                     </div>
@@ -220,23 +241,49 @@ export default function Home() {
                     </div>
                 </div>
             ) : (
-                <p className="text-center">
+                <p className="text-center font-bold mb-8">
                     Upload a SQLite file to visualize its content.
                 </p>
             )}
 
             <div className="flex justify-center mb-12">
                 <div
-                    className="w-full max-w-lg p-6 shadow rounded-lg"
+                    className="w-full max-w-3xl p-6 shadow rounded-lg"
                     style={{
                         backgroundColor: "var(--upload-box-bg)",
                     }}
                 >
                     <h2 className="text-lg font-semibold mb-4">
-                        Why use this?
+                        How does it work?
                     </h2>
                     <p className="mb-4">
-                        idk, for anyone looking through the git history, hai
+                        Whenever you upload a SQLite file, it gets sent to the
+                        server where the entire contents gets read and returned
+                        in a massive JSON object, which is parsed into multiple
+                        tables.
+                    </p>
+
+                    <h2 className="text-lg font-semibold mb-4">
+                        Do my files get saved?
+                    </h2>
+                    <p className="mb-4">
+                        Only when it&apos;s being processed. Once it&apos;s
+                        done, the file is immediately deleted, so no worries
+                        about your data being stored.
+                    </p>
+                    <p className="mb-4">
+                        A reminder that the site is open source, so you can view
+                        the code! Check the first link at the top of the page.
+                    </p>
+
+                    <h2 className="text-lg font-semibold mb-4">
+                        A reminder about large files
+                    </h2>
+                    <p className="mb-4">
+                        As the database gets visualised in the browser, it can
+                        be a bit slow with large files. Please be patient! Of
+                        course the site is limited by your system performance,
+                        so if you&apos;re on a potato, it&apos;s gonna be slow.
                     </p>
                 </div>
             </div>

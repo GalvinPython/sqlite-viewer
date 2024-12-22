@@ -16,7 +16,10 @@ export default function Document() {
                 <link href="/favicon.svg" rel="icon" />
                 <title>SQLite Database Viewer</title>
             </Head>
-            <body className="antialiased">
+            <body
+                className="antialiased"
+                style={{ backgroundColor: "var(--background-color)" }}
+            >
                 <Main />
                 <NextScript />
             </body>
