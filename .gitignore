@@ -15,3 +15,9 @@
 
 # tmp
 tmp/
+
+# sqlite stuff :p
+*.db
+
+# private testing stuff :p
+h.ts

@@ -38,7 +38,7 @@ function runMiddleware(
 // Set up rate-limiting
 const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    max: 10, // Limit each IP to 10 requests per windowMs
+    max: 10, // Limit each IP to 10 requests per minute
     message: { error: "Too many requests, please try again later." },
     keyGenerator: (req) => {
         const ip =
@@ -51,7 +51,7 @@ const limiter = rateLimit({
     },
 });
 
-// Helper function to run the rate-limiter middleware
+// Lets rate limit the API
 async function runRateLimiter(req: NextApiRequest, res: NextApiResponse) {
     await new Promise<void>((resolve, reject) => {
         limiter(req as any, res as any, (result: any) => {
@@ -75,6 +75,16 @@ export default async function handler(
 
             if (!file) {
                 res.status(400).json({ error: "No file uploaded" });
+
+                return;
+            }
+
+            if (
+                !file.originalname.endsWith(".sqlite") &&
+                !file.originalname.endsWith(".db") &&
+                !file.originalname.endsWith(".sqlite3")
+            ) {
+                res.status(400).json({ error: "Invalid file type" });
 
                 return;
             }
