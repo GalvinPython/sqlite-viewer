@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start --port 3001",
+    "start": "next start --port 8010",
     "lint": "eslint . --ext .ts,.tsx -c .eslintrc.json",
     "lint:fix": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix"
   },
