@@ -36,6 +36,7 @@ export default function Home() {
     const [data, setData] = useState<{ [key: string]: any[] } | null>(null);
     const [activeTab, setActiveTab] = useState<string>("");
     const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
         const systemPrefersDark = window.matchMedia(
@@ -78,6 +79,8 @@ export default function Home() {
 
         formData.append("file", file);
 
+        setIsLoading(true); // Set loading to true
+
         try {
             const response = await fetch("/api/upload", {
                 method: "POST",
@@ -96,6 +99,8 @@ export default function Home() {
         } catch (error) {
             console.error("Upload error:", error);
             alert("Error uploading file.");
+        } finally {
+            setIsLoading(false); // Reset loading state
         }
     };
 
@@ -143,6 +148,12 @@ export default function Home() {
             </table>
         );
     };
+
+    const Spinner = () => (
+        <div className="flex justify-center items-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500" />
+        </div>
+    );
 
     return (
         <div
@@ -229,7 +240,9 @@ export default function Home() {
                 </div>
             </div>
 
-            {data ? (
+            {isLoading ? (
+                <Spinner />
+            ) : data ? (
                 <div className="mb-8">
                     <Tabs
                         activeTab={activeTab}
@@ -248,7 +261,7 @@ export default function Home() {
 
             <div className="flex justify-center mb-12">
                 <div
-                    className="w-full max-w-3xl p-6 shadow rounded-lg"
+                    className="w-full max-w-6xl p-6 shadow rounded-lg"
                     style={{
                         backgroundColor: "var(--upload-box-bg)",
                     }}

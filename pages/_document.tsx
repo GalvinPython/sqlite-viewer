@@ -18,7 +18,10 @@ export default function Document() {
             </Head>
             <body
                 className="antialiased"
-                style={{ backgroundColor: "var(--background-color)" }}
+                style={{
+                    backgroundColor: "var(--background-color)",
+                    color: "var(--text-color)",
+                }}
             >
                 <Main />
                 <NextScript />
