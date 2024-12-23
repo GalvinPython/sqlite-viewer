@@ -79,7 +79,7 @@ export default function Home() {
 
         formData.append("file", file);
 
-        setIsLoading(true); // Set loading to true
+        setIsLoading(true);
 
         try {
             const response = await fetch("/api/upload", {
@@ -100,7 +100,7 @@ export default function Home() {
             console.error("Upload error:", error);
             alert("Error uploading file.");
         } finally {
-            setIsLoading(false); // Reset loading state
+            setIsLoading(false);
         }
     };
 
@@ -150,7 +150,7 @@ export default function Home() {
     };
 
     const Spinner = () => (
-        <div className="flex justify-center items-center">
+        <div className="flex justify-center items-center mb-4">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500" />
         </div>
     );
