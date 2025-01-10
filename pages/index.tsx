@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { SiSqlite, SiGithub } from "react-icons/si";
-import { FaCloudUploadAlt, FaDatabase } from "react-icons/fa";
+import { FaCloudUploadAlt, FaDatabase, FaLock } from "react-icons/fa";
 
 interface TabsProps {
     tabs: string[];
@@ -60,7 +60,9 @@ export default function Home() {
         if (!file) return alert("Please select a file first.");
 
         if (file.size > 50 * 1024 * 1024) {
-            return alert("File size exceeds the 50MB limit.");
+            return alert(
+                "File size exceeds the 50MB limit. That's a good thing though because unless you're NASA, your pc would probably explode.",
+            );
         }
 
         const fileExtension = file.name.split(".").pop()?.toLowerCase();
@@ -168,19 +170,33 @@ export default function Home() {
                     <SiSqlite />
                     SQLite Reader
                 </h1>
-                <a
-                    className="px-4 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2"
-                    href="https://github.com/GalvinPython/sqlite-viewer"
-                    rel="noopener noreferrer"
-                    style={{
-                        backgroundColor: "var(--button-bg)",
-                        color: "var(--button-text-color)",
-                    }}
-                    target="_blank"
-                >
-                    <SiGithub />
-                    View on GitHub
-                </a>
+                <div className="flex gap-4">
+                    <a
+                        className="px-4 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2"
+                        href="https://github.com/GalvinPython/sqlite-viewer"
+                        rel="noopener noreferrer"
+                        style={{
+                            backgroundColor: "var(--button-bg)",
+                            color: "var(--button-text-color)",
+                        }}
+                        target="_blank"
+                    >
+                        <SiGithub />
+                        View on GitHub
+                    </a>
+                    <button
+                        className="px-4 py-2 rounded transition inline-flex items-center gap-2 cursor-not-allowed opacity-50"
+                        style={{
+                            backgroundColor: "var(--button-bg)",
+                            color: "var(--button-text-color)",
+                        }}
+                        title="Coming soon 👀"
+                        onClick={(e) => e.preventDefault()}
+                    >
+                        <FaLock />
+                        Coming Soon
+                    </button>
+                </div>
             </header>
 
             <div className="flex justify-center mb-12">
