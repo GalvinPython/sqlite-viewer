@@ -14,6 +14,10 @@
 # tmp
 tmp/
 
+# site assets in public folder (yes its still publicly accessible)
+ads.txt
+BingSiteAuth.xml
+
 # sqlite stuff :p
 *.sqlite3
 
