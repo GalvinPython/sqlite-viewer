@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FaCloudUploadAlt, FaDatabase } from "react-icons/fa";
-
+import { SiSqlite, SiGithub } from "react-icons/si";
+import { FaCloudUploadAlt, FaDatabase, FaLock } from "react-icons/fa";
 import Navbar from "@/components/Navbar";
 
 interface TabsProps {
@@ -85,7 +85,7 @@ export default function Home() {
         setIsLoading(true);
 
         try {
-            const response = await fetch("/api/upload", {
+            const response = await fetch("/api/convert", {
                 method: "POST",
                 body: formData,
             });
