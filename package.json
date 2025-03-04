@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3001",
+    "dev": "concurrently 'next dev --port 3001' 'bun --watch cron.ts'",
     "build": "next build",
     "start": "concurrently 'next start --port 8010' 'bun run cron.ts'",
     "start:preview": "concurrently 'next start --port 8011' 'bun run cron.ts'",
@@ -20,6 +20,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.4.0",
+    "sql.js": "^1.12.0",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
@@ -30,6 +31,7 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sql.js": "^1.4.9",
     "@typescript-eslint/eslint-plugin": "7.2.0",
     "@typescript-eslint/parser": "7.2.0",
     "concurrently": "^9.1.2",

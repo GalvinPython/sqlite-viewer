@@ -74,7 +74,9 @@ export default async function handler(
             const file = (req as any).file;
 
             if (!file) {
-                res.status(400).json({ error: "No file uploaded" });
+                res.status(400).json({
+                    error: "No file specified. If you're using the API and viewing sqlite files up to 250MB large, you can convert into JSON, CSV etc. Go to /api to be redirected to the docs",
+                });
 
                 return;
             }
@@ -84,7 +86,18 @@ export default async function handler(
                 !file.originalname.endsWith(".db") &&
                 !file.originalname.endsWith(".sqlite3")
             ) {
-                res.status(400).json({ error: "Invalid file type" });
+                res.status(400).json({
+                    error: "Invalid file. If you're using the API and viewing sqlite files up to 250MB large, you can convert into JSON, CSV etc. Go to /api to be redirected to the docs",
+                });
+
+                return;
+            }
+
+            // Limit file size to 50MB on the API also
+            if (file.size > 50 * 1024 * 1024) {
+                res.status(400).json({
+                    error: "File too large. If you're using the API and viewing sqlite files up to 250MB large, you can convert into JSON, CSV etc. Go to /api to be redirected to the docs",
+                });
 
                 return;
             }

@@ -61,10 +61,28 @@ async function runRateLimiter(req: NextApiRequest, res: NextApiResponse) {
     });
 }
 
+// Convert functions
+
+// API Handler
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse,
 ) {
+    if (req.method === "GET") {
+        res.status(200).json({
+            message:
+                "The GET method is not supported. Please use the POST method to upload a SQLite file. But enjoy the developer stuff instead",
+            req: {
+                headers: req.headers,
+                url: req.url,
+                method: req.method,
+                query: req.query,
+            },
+        });
+
+        return;
+    }
+
     try {
         await runRateLimiter(req, res);
 
@@ -74,7 +92,9 @@ export default async function handler(
             const file = (req as any).file;
 
             if (!file) {
-                res.status(400).json({ error: "No file uploaded" });
+                res.status(400).json({
+                    error: "No file specified.",
+                });
 
                 return;
             }
@@ -84,7 +104,18 @@ export default async function handler(
                 !file.originalname.endsWith(".db") &&
                 !file.originalname.endsWith(".sqlite3")
             ) {
-                res.status(400).json({ error: "Invalid file type" });
+                res.status(400).json({
+                    error: "Invalid file.",
+                });
+
+                return;
+            }
+
+            // Limit file size to 250MB on the API also
+            if (file.size > 250 * 1024 * 1024) {
+                res.status(400).json({
+                    error: "File too large. Please note that the API only supports files up to 250MB. ",
+                });
 
                 return;
             }

@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { SiSqlite, SiGithub } from "react-icons/si";
-import { FaCloudUploadAlt, FaDatabase, FaLock } from "react-icons/fa";
+import { FaCloudUploadAlt, FaDatabase } from "react-icons/fa";
+import initSqlJs, { Database } from "sql.js";
+
 import Navbar from "@/components/Navbar";
 
 interface TabsProps {
@@ -34,10 +35,25 @@ Tabs.displayName = "Tabs";
 
 export default function Home() {
     const [file, setFile] = useState<File | null>(null);
+    const [db, setDb] = useState<Database | null>(null);
+    const [queryResult, setQueryResult] = useState<any>(null);
     const [data, setData] = useState<{ [key: string]: any[] } | null>(null);
     const [activeTab, setActiveTab] = useState<string>("");
     const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    useEffect(() => {
+        const loadDb = async () => {
+            const SQL = await initSqlJs({
+                locateFile: () => "/sql-wasm.wasm", // Ensure the correct path
+            });
+            const database = new SQL.Database();
+
+            setDb(database);
+        };
+
+        loadDb();
+    }, []);
 
     useEffect(() => {
         const systemPrefersDark = window.matchMedia(
@@ -57,54 +73,31 @@ export default function Home() {
         }
     };
 
-    const handleUpload = async () => {
-        if (!file) return alert("Please select a file first.");
+    const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
 
-        if (file.size > 50 * 1024 * 1024) {
-            return alert(
-                "File size exceeds the 50MB limit. That's a good thing though because unless you're NASA, your pc would probably explode.",
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = async (e) => {
+            const arrayBuffer = e.target?.result;
+
+            if (!arrayBuffer) return;
+
+            const SQL = await initSqlJs();
+            const database = new SQL.Database(new Uint8Array(arrayBuffer));
+
+            setDb(database);
+
+            const result = database.exec(
+                "SELECT name FROM sqlite_master WHERE type='table'",
             );
-        }
 
-        const fileExtension = file.name.split(".").pop()?.toLowerCase();
+            setQueryResult(result);
+        };
 
-        if (
-            fileExtension !== "db" &&
-            fileExtension !== "sqlite" &&
-            fileExtension !== "sqlite3"
-        ) {
-            return alert(
-                "Invalid file type. Please upload a .db, .sqlite, or .sqlite3 file.",
-            );
-        }
-
-        const formData = new FormData();
-
-        formData.append("file", file);
-
-        setIsLoading(true);
-
-        try {
-            const response = await fetch("/api/convert", {
-                method: "POST",
-                body: formData,
-            });
-
-            if (!response.ok) throw new Error("Failed to upload file.");
-
-            const result = await response.json();
-
-            setData(result);
-
-            const firstTable = Object.keys(result)[0];
-
-            if (firstTable) setActiveTab(firstTable);
-        } catch (error) {
-            console.error("Upload error:", error);
-            alert("Error uploading file.");
-        } finally {
-            setIsLoading(false);
-        }
+        reader.readAsArrayBuffer(file);
     };
 
     const renderTable = (tableData: any[]) => {
