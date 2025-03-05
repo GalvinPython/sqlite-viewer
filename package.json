@@ -11,6 +11,7 @@
     "lint:fix": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix"
   },
   "dependencies": {
+    "@heroui/radio": "^2.3.14",
     "@million/lint": "^1.0.14",
     "bun-types": "^1.1.39",
     "next": "15.1.0",

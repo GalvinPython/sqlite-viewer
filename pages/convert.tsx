@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from "react";
 import { FaCloudUploadAlt, FaDatabase } from "react-icons/fa";
 import initSqlJs from "sql.js";
+// import { RadioGroup, Radio } from "@heroui/radio";
 
 import Navbar from "@/components/Navbar";
 
@@ -198,6 +199,7 @@ export default function Home() {
                             <FaDatabase />
                             Choose File
                         </label>
+
                         {file && (
                             <p className="text-sm">
                                 Selected File:{" "}
