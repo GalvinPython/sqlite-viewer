@@ -1,2 +1,2 @@
 * text=auto eol=lf
-*.lockb binary diff=lockb
+*.wasm binary diff=wasm

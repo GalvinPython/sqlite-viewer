@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { FaCloudUploadAlt, FaDatabase } from "react-icons/fa";
+import initSqlJs from "sql.js";
 
 import Navbar from "@/components/Navbar";
 
@@ -29,7 +30,6 @@ const Tabs = React.memo(({ tabs, activeTab, onTabChange }: TabsProps) => (
     </div>
 ));
 
-// Everything will die if i remove this
 Tabs.displayName = "Tabs";
 
 export default function Home() {
@@ -37,7 +37,6 @@ export default function Home() {
     const [data, setData] = useState<{ [key: string]: any[] } | null>(null);
     const [activeTab, setActiveTab] = useState<string>("");
     const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
         const systemPrefersDark = window.matchMedia(
@@ -66,45 +65,53 @@ export default function Home() {
             );
         }
 
-        const fileExtension = file.name.split(".").pop()?.toLowerCase();
+        if (!file) return;
 
-        if (
-            fileExtension !== "db" &&
-            fileExtension !== "sqlite" &&
-            fileExtension !== "sqlite3"
-        ) {
-            return alert(
-                "Invalid file type. Please upload a .db, .sqlite, or .sqlite3 file.",
+        const reader = new FileReader();
+
+        reader.onload = async (e) => {
+            const arrayBuffer = e.target?.result as ArrayBuffer;
+
+            if (!arrayBuffer) return;
+
+            const SQL = await initSqlJs();
+            const database = new SQL.Database(new Uint8Array(arrayBuffer));
+
+            // Get all table names
+            const tablesResult = database.exec(
+                "SELECT name FROM sqlite_master WHERE type='table'",
             );
-        }
 
-        const formData = new FormData();
+            if (tablesResult.length === 0) return;
 
-        formData.append("file", file);
+            const tableNames = tablesResult[0].values.flat() as string[];
 
-        setIsLoading(true);
+            setActiveTab(tableNames[0]); // Set the first table as active
 
-        try {
-            const response = await fetch("/api/upload", {
-                method: "POST",
-                body: formData,
-            });
+            // Fetch data for each table
+            const dbData: { [key: string]: any[] } = {};
 
-            if (!response.ok) throw new Error("Failed to upload file.");
+            for (const table of tableNames) {
+                const result = database.exec(`SELECT * FROM ${table}`);
 
-            const result = await response.json();
+                if (result.length > 0) {
+                    const columns = result[0].columns;
+                    const rows = result[0].values.map((row) =>
+                        Object.fromEntries(
+                            columns.map((col, i) => [col, row[i]]),
+                        ),
+                    );
 
-            setData(result);
+                    dbData[table] = rows;
+                } else {
+                    dbData[table] = [];
+                }
+            }
 
-            const firstTable = Object.keys(result)[0];
+            setData(dbData);
+        };
 
-            if (firstTable) setActiveTab(firstTable);
-        } catch (error) {
-            console.error("Upload error:", error);
-            alert("Error uploading file.");
-        } finally {
-            setIsLoading(false);
-        }
+        reader.readAsArrayBuffer(file);
     };
 
     const renderTable = (tableData: any[]) => {
@@ -117,6 +124,9 @@ export default function Home() {
             <table className="w-full text-left border-collapse border border-gray-200 dark:border-gray-700">
                 <thead>
                     <tr className="bg-gray-200 dark:bg-gray-800">
+                        <th className="p-3 border border-gray-300 font-medium text-gray-700 dark:text-gray-300">
+                            #
+                        </th>
                         {columns.map((col, index) => (
                             <th
                                 key={index}
@@ -137,6 +147,9 @@ export default function Home() {
                                     : "bg-gray-50 dark:bg-gray-800"
                             } hover:bg-gray-100 dark:hover:bg-gray-700`}
                         >
+                            <td className="p-3 border border-gray-300 dark:border-gray-700">
+                                {rowIndex + 1}
+                            </td>
                             {columns.map((col, colIndex) => (
                                 <td
                                     key={colIndex}
@@ -152,12 +165,6 @@ export default function Home() {
         );
     };
 
-    const Spinner = () => (
-        <div className="flex justify-center items-center mb-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500" />
-        </div>
-    );
-
     return (
         <div style={{ color: "var(--text-color)" }}>
             <Navbar />
@@ -165,9 +172,7 @@ export default function Home() {
             <div className="flex justify-center mb-12">
                 <div
                     className="w-full max-w-3xl p-6 shadow rounded-lg"
-                    style={{
-                        backgroundColor: "var(--upload-box-bg)",
-                    }}
+                    style={{ backgroundColor: "var(--upload-box-bg)" }}
                 >
                     <h2 className="text-lg text-center font-semibold mb-4">
                         Upload SQLite File
@@ -180,7 +185,6 @@ export default function Home() {
                             type="file"
                             onChange={handleFileChange}
                         />
-
                         <label
                             className="px-6 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2"
                             htmlFor="file-upload"
@@ -213,15 +217,14 @@ export default function Home() {
                         </button>
                     </div>
 
-                    <h2 className="text-lg font-semibold mb-4 text-center">
-                        btw, there&apos;s a maximum upload limit of 50MB
-                    </h2>
+                    <p className="text-lg font-semibold mb-4 text-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent">
+                        Update: There is no upload limit anymore, it&apos;s all
+                        done in your browser! Better for security and privacy.
+                    </p>
                 </div>
             </div>
 
-            {isLoading ? (
-                <Spinner />
-            ) : data ? (
+            {data ? (
                 <div className="mb-8">
                     <Tabs
                         activeTab={activeTab}
@@ -249,23 +252,20 @@ export default function Home() {
                         How does it work?
                     </h2>
                     <p className="mb-4">
-                        Whenever you upload a SQLite file, it gets sent to the
-                        server where the entire contents gets read and returned
-                        in a massive JSON object, which is parsed into multiple
-                        tables.
+                        When you upload your SQLite file, it gets processed
+                        locally on your device and is stored in RAM. It then
+                        reads the data of the database and visualizes it in the
+                        browser.
                     </p>
 
                     <h2 className="text-lg font-semibold mb-4">
                         Do my files get saved?
                     </h2>
-                    <p className="mb-4">
-                        Only when it&apos;s being processed. Once it&apos;s
-                        done, the file is immediately deleted, so no worries
-                        about your data being stored.
-                    </p>
+                    <p className="mb-4">Nope, it&apos;s all locally done!</p>
                     <p className="mb-4">
                         A reminder that the site is open source, so you can view
-                        the code! Check the first link at the top of the page.
+                        the code! Click the &quot;View on GitHub&quot; button to
+                        see more.
                     </p>
 
                     <h2 className="text-lg font-semibold mb-4">

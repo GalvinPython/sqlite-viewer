@@ -6,7 +6,9 @@ const nextConfig: NextConfig = {
     /* config options here */
     reactStrictMode: true,
     webpack: (config) => {
-        config.externals.push("bun:sqlite");
+        config.resolve.fallback = {
+            fs: false,
+        };
 
         return config;
     },
