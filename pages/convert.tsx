@@ -75,30 +75,48 @@ export default function Home() {
 
     const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-
         if (!file) return;
-
+    
         const reader = new FileReader();
-
         reader.onload = async (e) => {
-            const arrayBuffer = e.target?.result;
-
+            const arrayBuffer = e.target?.result as ArrayBuffer;
             if (!arrayBuffer) return;
-
+    
             const SQL = await initSqlJs();
             const database = new SQL.Database(new Uint8Array(arrayBuffer));
-
             setDb(database);
-
-            const result = database.exec(
-                "SELECT name FROM sqlite_master WHERE type='table'",
+    
+            // Get all table names
+            const tablesResult = database.exec(
+                "SELECT name FROM sqlite_master WHERE type='table'"
             );
-
-            setQueryResult(result);
+    
+            if (tablesResult.length === 0) return;
+    
+            const tableNames = tablesResult[0].values.flat() as string[];
+            setActiveTab(tableNames[0]); // Set the first table as active
+    
+            // Fetch data for each table
+            const dbData: { [key: string]: any[] } = {};
+            for (const table of tableNames) {
+                const result = database.exec(`SELECT * FROM ${table}`);
+                if (result.length > 0) {
+                    const columns = result[0].columns;
+                    const rows = result[0].values.map((row) =>
+                        Object.fromEntries(columns.map((col, i) => [col, row[i]]))
+                    );
+                    dbData[table] = rows;
+                } else {
+                    dbData[table] = [];
+                }
+            }
+    
+            setData(dbData);
         };
-
+    
         reader.readAsArrayBuffer(file);
     };
+    
 
     const renderTable = (tableData: any[]) => {
         if (!tableData || tableData.length === 0)
