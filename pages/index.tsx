@@ -59,14 +59,6 @@ export default function Home() {
     const handleUpload = async () => {
         if (!file) return alert("Please select a file first.");
 
-        if (file.size > 50 * 1024 * 1024) {
-            return alert(
-                "File size exceeds the 50MB limit. That's a good thing though because unless you're NASA, your pc would probably explode.",
-            );
-        }
-
-        if (!file) return;
-
         const reader = new FileReader();
 
         reader.onload = async (e) => {

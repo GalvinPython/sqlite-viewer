@@ -1,11 +1,8 @@
-// yes i know the page is the exact same as index.tsx, it's just temporary lol
-
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { FaCloudUploadAlt, FaDatabase } from "react-icons/fa";
 import initSqlJs from "sql.js";
-// import { RadioGroup, Radio } from "@heroui/radio";
 
 import Navbar from "@/components/Navbar";
 
@@ -62,14 +59,6 @@ export default function Home() {
     const handleUpload = async () => {
         if (!file) return alert("Please select a file first.");
 
-        if (file.size > 50 * 1024 * 1024) {
-            return alert(
-                "File size exceeds the 50MB limit. That's a good thing though because unless you're NASA, your pc would probably explode.",
-            );
-        }
-
-        if (!file) return;
-
         const reader = new FileReader();
 
         reader.onload = async (e) => {
@@ -116,6 +105,13 @@ export default function Home() {
 
         reader.readAsArrayBuffer(file);
     };
+
+    const [selectedKeys, setSelectedKeys] = React.useState(new Set(["text"]));
+
+    const selectedValue = React.useMemo(
+        () => Array.from(selectedKeys).join(", "),
+        [selectedKeys],
+    );
 
     const renderTable = (tableData: any[]) => {
         if (!tableData || tableData.length === 0)
@@ -178,7 +174,7 @@ export default function Home() {
                     style={{ backgroundColor: "var(--upload-box-bg)" }}
                 >
                     <h2 className="text-lg text-center font-semibold mb-4">
-                        Upload SQLite File
+                        1. Upload SQLite File
                     </h2>
                     <div className="flex flex-col items-center gap-4">
                         <input
@@ -225,6 +221,61 @@ export default function Home() {
                         Update: There is no upload limit anymore, it&apos;s all
                         done in your browser! Better for security and privacy.
                     </p>
+
+                    <div className="text-center">
+                        <h2 className="text-lg text-center font-semibold mb-4">
+                            2. Select your chosen output format
+                        </h2>
+                        <div className="flex justify-center gap-4">
+                            {["TSV", "CSV", "JSON"].map((option) => {
+                                const descriptions: { [key: string]: string } =
+                                    {
+                                        TSV: "Tab-Separated Values",
+                                        CSV: "Comma-Separated Values",
+                                        JSON: "JavaScript Object Notation",
+                                    };
+
+                                return (
+                                    <label
+                                        key={option}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded cursor-pointer transition ${
+                                            selectedKeys.has(option)
+                                                ? "bg-green-500 text-white hover:bg-green-600"
+                                                : "bg-blue-500 text-white hover:bg-blue-600"
+                                        }`}
+                                        title={descriptions[option]}
+                                    >
+                                        <input
+                                            checked={selectedKeys.has(option)}
+                                            className="form-checkbox hidden"
+                                            name="custom-checkbox"
+                                            type="checkbox"
+                                            value={option}
+                                            onChange={() => {
+                                                const newSelectedKeys = new Set(
+                                                    selectedKeys,
+                                                );
+
+                                                if (
+                                                    newSelectedKeys.has(option)
+                                                ) {
+                                                    newSelectedKeys.delete(
+                                                        option,
+                                                    );
+                                                } else {
+                                                    newSelectedKeys.add(option);
+                                                }
+                                                setSelectedKeys(
+                                                    newSelectedKeys,
+                                                );
+                                            }}
+                                        />
+                                        {option}
+                                    </label>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
             </div>
 
