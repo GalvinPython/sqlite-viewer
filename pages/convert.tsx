@@ -6,37 +6,10 @@ import initSqlJs from "sql.js";
 
 import Navbar from "@/components/Navbar";
 
-interface TabsProps {
-    tabs: string[];
-    activeTab: string;
-    onTabChange: (tab: string) => void;
-}
-
-const Tabs = React.memo(({ tabs, activeTab, onTabChange }: TabsProps) => (
-    <div className="flex gap-4 border-b border-gray-300 pb-2 dark:border-gray-700">
-        {tabs.map((tab: string, index: number) => (
-            <button
-                key={index}
-                className={`py-2 px-4 text-sm font-semibold transition-colors ${
-                    activeTab === tab
-                        ? "border-b-4 border-blue-500 text-blue-600 dark:text-blue-400"
-                        : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"
-                }`}
-                onClick={() => onTabChange(tab)}
-            >
-                {tab}
-            </button>
-        ))}
-    </div>
-));
-
-Tabs.displayName = "Tabs";
-
 export default function Home() {
     const [file, setFile] = useState<File | null>(null);
-    const [data, setData] = useState<{ [key: string]: any[] } | null>(null);
-    const [activeTab, setActiveTab] = useState<string>("");
     const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+    const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         const systemPrefersDark = window.matchMedia(
@@ -58,8 +31,11 @@ export default function Home() {
 
     const handleUpload = async () => {
         if (!file) return alert("Please select a file first.");
+        if (!selectedKeys.size) return alert("Please select an output format.");
 
         const reader = new FileReader();
+
+        console.log(selectedKeys);
 
         reader.onload = async (e) => {
             const arrayBuffer = e.target?.result as ArrayBuffer;
@@ -77,8 +53,6 @@ export default function Home() {
             if (tablesResult.length === 0) return;
 
             const tableNames = tablesResult[0].values.flat() as string[];
-
-            setActiveTab(tableNames[0]); // Set the first table as active
 
             // Fetch data for each table
             const dbData: { [key: string]: any[] } = {};
@@ -99,69 +73,9 @@ export default function Home() {
                     dbData[table] = [];
                 }
             }
-
-            setData(dbData);
         };
 
         reader.readAsArrayBuffer(file);
-    };
-
-    const [selectedKeys, setSelectedKeys] = React.useState(new Set(["text"]));
-
-    const selectedValue = React.useMemo(
-        () => Array.from(selectedKeys).join(", "),
-        [selectedKeys],
-    );
-
-    const renderTable = (tableData: any[]) => {
-        if (!tableData || tableData.length === 0)
-            return <p>No data available.</p>;
-
-        const columns = Object.keys(tableData[0]);
-
-        return (
-            <table className="w-full text-left border-collapse border border-gray-200 dark:border-gray-700">
-                <thead>
-                    <tr className="bg-gray-200 dark:bg-gray-800">
-                        <th className="p-3 border border-gray-300 font-medium text-gray-700 dark:text-gray-300">
-                            #
-                        </th>
-                        {columns.map((col, index) => (
-                            <th
-                                key={index}
-                                className="p-3 border border-gray-300 font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                {col}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {tableData.map((row, rowIndex) => (
-                        <tr
-                            key={rowIndex}
-                            className={`${
-                                rowIndex % 2 === 0
-                                    ? "bg-white dark:bg-gray-900"
-                                    : "bg-gray-50 dark:bg-gray-800"
-                            } hover:bg-gray-100 dark:hover:bg-gray-700`}
-                        >
-                            <td className="p-3 border border-gray-300 dark:border-gray-700">
-                                {rowIndex + 1}
-                            </td>
-                            {columns.map((col, colIndex) => (
-                                <td
-                                    key={colIndex}
-                                    className="p-3 border border-gray-300 dark:border-gray-700"
-                                >
-                                    {row[col] || "N/A"}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        );
     };
 
     return (
@@ -204,26 +118,15 @@ export default function Home() {
                                 </span>
                             </p>
                         )}
-                        <button
-                            className="px-6 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2 mb-4"
-                            style={{
-                                backgroundColor: "var(--button-bg)",
-                                color: "var(--button-text-color)",
-                            }}
-                            onClick={handleUpload}
-                        >
-                            <FaCloudUploadAlt />
-                            Upload File
-                        </button>
                     </div>
 
-                    <p className="text-lg font-semibold mb-4 text-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent">
+                    <p className="text-lg font-semibold mb-4 text-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent mt-4">
                         Update: There is no upload limit anymore, it&apos;s all
                         done in your browser! Better for security and privacy.
                     </p>
 
-                    <div className="text-center">
-                        <h2 className="text-lg text-center font-semibold mb-4">
+                    <div className="flex flex-col items-center gap-4 text-center">
+                        <h2 className="text-lg text-center font-semibold">
                             2. Select your chosen output format
                         </h2>
                         <div className="flex justify-center gap-4">
@@ -256,45 +159,51 @@ export default function Home() {
                                                     selectedKeys,
                                                 );
 
-                                                if (
-                                                    newSelectedKeys.has(option)
-                                                ) {
-                                                    newSelectedKeys.delete(
-                                                        option,
-                                                    );
-                                                } else {
-                                                    newSelectedKeys.add(option);
-                                                }
+                                                newSelectedKeys.has(option)
+                                                    ? newSelectedKeys.delete(
+                                                          option,
+                                                      )
+                                                    : newSelectedKeys.add(
+                                                          option,
+                                                      );
                                                 setSelectedKeys(
-                                                    newSelectedKeys,
+                                                    new Set(newSelectedKeys),
                                                 );
                                             }}
                                         />
+                                        {selectedKeys.has(option) && (
+                                            <span>&#10003;</span>
+                                        )}
                                         {option}
                                     </label>
                                 );
                             })}
                         </div>
+                        <p className="text-lg font-semibold mb-4 text-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent mt-4">
+                            Note: Selecting multiple formats or choosing the CSV
+                            option, you&apos;ll get a zip file with all the
+                            files you want.
+                        </p>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-4 mt-4">
+                        <h2 className="text-lg text-center font-semibold">
+                            3. Convert!
+                        </h2>
+                        <button
+                            className="px-6 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2 mb-4"
+                            style={{
+                                backgroundColor: "var(--button-bg)",
+                                color: "var(--button-text-color)",
+                            }}
+                            onClick={handleUpload}
+                        >
+                            <FaCloudUploadAlt />
+                            Upload File
+                        </button>
                     </div>
                 </div>
             </div>
-
-            {data ? (
-                <div className="mb-8">
-                    <Tabs
-                        activeTab={activeTab}
-                        tabs={Object.keys(data)}
-                        onTabChange={setActiveTab}
-                    />
-                    <div className="mt-6">
-                        {activeTab && renderTable(data[activeTab])}
-                    </div>
-                </div>
-            ) : (
-                <p className="text-center font-bold mb-8">
-                    Upload a SQLite file to visualize its content.
-                </p>
-            )}
 
             <div className="flex justify-center mb-12">
                 <div
