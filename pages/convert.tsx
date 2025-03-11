@@ -35,7 +35,7 @@ export default function Home() {
 
         const reader = new FileReader();
 
-        console.log(selectedKeys);
+        console.debug(selectedKeys);
 
         reader.onload = async (e) => {
             const arrayBuffer = e.target?.result as ArrayBuffer;
@@ -56,6 +56,8 @@ export default function Home() {
 
             // Fetch data for each table
             const dbData: { [key: string]: any[] } = {};
+            let tsvContent = "";
+            let jsonContent: { [key: string]: any[] } = {};
 
             for (const table of tableNames) {
                 const result = database.exec(`SELECT * FROM ${table}`);
@@ -69,10 +71,69 @@ export default function Home() {
                     );
 
                     dbData[table] = rows;
+
+                    if (selectedKeys.has("CSV")) {
+                        // Convert table data to CSV
+                        const csvContent = [
+                            columns.join(","),
+                            ...rows.map((row) =>
+                                columns.map((col) => row[col]).join(","),
+                            ),
+                        ].join("\n");
+
+                        // Create and download CSV file
+                        const blob = new Blob([csvContent], {
+                            type: "text/csv;charset=utf-8;",
+                        });
+
+                        const link = document.createElement("a");
+
+                        link.href = URL.createObjectURL(blob);
+                        link.download = `${table}.csv`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+
+                    if (selectedKeys.has("JSON")) {
+                        jsonContent[table] = rows;
+                    }
                 } else {
                     dbData[table] = [];
                 }
             }
+
+            // Export combined TSV file if selected
+            if (selectedKeys.has("TSV") && tsvContent) {
+                const blob = new Blob([tsvContent], {
+                    type: "text/tab-separated-values;charset=utf-8;",
+                });
+
+                const link = document.createElement("a");
+
+                link.href = URL.createObjectURL(blob);
+                link.download = `database.tsv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            // Export combined JSON file if selected
+            if (selectedKeys.has("JSON")) {
+                const blob = new Blob([JSON.stringify(jsonContent, null, 2)], {
+                    type: "application/json;charset=utf-8;",
+                });
+
+                const link = document.createElement("a");
+
+                link.href = URL.createObjectURL(blob);
+                link.download = `database.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            console.debug(dbData);
         };
 
         reader.readAsArrayBuffer(file);
@@ -133,7 +194,6 @@ export default function Home() {
                             {["TSV", "CSV", "JSON"].map((option) => {
                                 const descriptions: { [key: string]: string } =
                                     {
-                                        TSV: "Tab-Separated Values",
                                         CSV: "Comma-Separated Values",
                                         JSON: "JavaScript Object Notation",
                                     };

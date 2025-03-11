@@ -17,8 +17,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.4.0",
-    "sql.js": "^1.12.0",
-    "sqlite3": "^5.1.7"
+    "sql.js": "^1.12.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
