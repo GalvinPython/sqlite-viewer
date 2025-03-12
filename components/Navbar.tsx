@@ -1,14 +1,28 @@
 import { SiSqlite, SiGithub } from "react-icons/si";
 import { FaFileCsv, FaHome } from "react-icons/fa";
+import { useState, useEffect } from "react";
 
 const Navbar: React.FC = () => {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 770);
+        };
+
+        window.addEventListener("resize", handleResize);
+        handleResize();
+
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
     return (
         <header className="bg-gray-800 text-white w-full mb-4">
             <div className="container mx-auto flex justify-between items-center p-4">
                 <div className="flex items-center gap-4">
                     <h1 className="text-2xl font-semibold flex items-center gap-2">
                         <SiSqlite />
-                        SQLite Reader
+                        {!isMobile && "SQLite Reader"}
                     </h1>
                     <a
                         className="px-4 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2"
@@ -17,6 +31,7 @@ const Navbar: React.FC = () => {
                             backgroundColor: "var(--button-bg)",
                             color: "var(--button-text-color)",
                         }}
+                        title="Home"
                     >
                         <FaHome />
                         Home
@@ -28,6 +43,7 @@ const Navbar: React.FC = () => {
                             backgroundColor: "var(--button-bg)",
                             color: "var(--button-text-color)",
                         }}
+                        title="Convert"
                     >
                         <FaFileCsv />
                         Convert
@@ -41,9 +57,10 @@ const Navbar: React.FC = () => {
                             color: "var(--button-text-color)",
                         }}
                         target="_blank"
+                        title="GitHub"
                     >
                         <SiGithub />
-                        View on GitHub
+                        {isMobile ? "GitHub" : "View on GitHub"}
                     </a>
                 </div>
             </div>
