@@ -5,6 +5,7 @@ import { FaCloudUploadAlt, FaDatabase } from "react-icons/fa";
 import initSqlJs from "sql.js";
 
 import Navbar from "@/components/Navbar";
+import Questions from "@/components/Questions";
 
 interface TabsProps {
     tabs: string[];
@@ -233,44 +234,7 @@ export default function Home() {
                 </p>
             )}
 
-            <div className="flex justify-center mb-12">
-                <div
-                    className="w-full max-w-6xl p-6 shadow rounded-lg"
-                    style={{
-                        backgroundColor: "var(--upload-box-bg)",
-                    }}
-                >
-                    <h2 className="text-lg font-semibold mb-4">
-                        How does it work?
-                    </h2>
-                    <p className="mb-4">
-                        When you upload your SQLite file, it gets processed
-                        locally on your device and is stored in RAM. It then
-                        reads the data of the database and visualizes it in the
-                        browser.
-                    </p>
-
-                    <h2 className="text-lg font-semibold mb-4">
-                        Do my files get saved?
-                    </h2>
-                    <p className="mb-4">Nope, it&apos;s all locally done!</p>
-                    <p className="mb-4">
-                        A reminder that the site is open source, so you can view
-                        the code! Click the &quot;View on GitHub&quot; button to
-                        see more.
-                    </p>
-
-                    <h2 className="text-lg font-semibold mb-4">
-                        A reminder about large files
-                    </h2>
-                    <p className="mb-4">
-                        As the database gets visualised in the browser, it can
-                        be a bit slow with large files. Please be patient! Of
-                        course the site is limited by your system performance,
-                        so if you&apos;re on a potato, it&apos;s gonna be slow.
-                    </p>
-                </div>
-            </div>
+            <Questions />
         </div>
     );
 }
