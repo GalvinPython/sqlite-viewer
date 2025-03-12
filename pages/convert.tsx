@@ -56,7 +56,6 @@ export default function Home() {
 
             // Fetch data for each table
             const dbData: { [key: string]: any[] } = {};
-            let tsvContent = "";
             let jsonContent: { [key: string]: any[] } = {};
 
             for (const table of tableNames) {
@@ -101,21 +100,6 @@ export default function Home() {
                 } else {
                     dbData[table] = [];
                 }
-            }
-
-            // Export combined TSV file if selected
-            if (selectedKeys.has("TSV") && tsvContent) {
-                const blob = new Blob([tsvContent], {
-                    type: "text/tab-separated-values;charset=utf-8;",
-                });
-
-                const link = document.createElement("a");
-
-                link.href = URL.createObjectURL(blob);
-                link.download = `database.tsv`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
             }
 
             // Export combined JSON file if selected
@@ -191,7 +175,7 @@ export default function Home() {
                             2. Select your chosen output format
                         </h2>
                         <div className="flex justify-center gap-4">
-                            {["TSV", "CSV", "JSON"].map((option) => {
+                            {["CSV", "JSON"].map((option) => {
                                 const descriptions: { [key: string]: string } =
                                     {
                                         CSV: "Comma-Separated Values",
