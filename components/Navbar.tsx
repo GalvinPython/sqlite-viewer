@@ -1,5 +1,5 @@
 import { SiSqlite, SiGithub } from "react-icons/si";
-import { FaFileCsv, FaHome } from "react-icons/fa";
+import { FaHome, FaFileExport } from "react-icons/fa";
 import { useState, useEffect } from "react";
 
 const Navbar: React.FC = () => {
@@ -45,7 +45,7 @@ const Navbar: React.FC = () => {
                         }}
                         title="Convert"
                     >
-                        <FaFileCsv />
+                        <FaFileExport />
                         Convert
                     </a>
                     <a

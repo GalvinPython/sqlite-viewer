@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { FaCloudUploadAlt, FaDatabase } from "react-icons/fa";
+import { VscJson } from "react-icons/vsc";
+import { LuFileSpreadsheet } from "react-icons/lu";
 import initSqlJs from "sql.js";
 import JSZip from "jszip";
 
@@ -101,7 +103,17 @@ export default function Home() {
                     },
                 );
 
-                blobs.push({ name: "database.json", blob: jsonBlob });
+                blobs.push({ name: `${file.name}.json`, blob: jsonBlob });
+            }
+
+            if (blobs.length === 0) {
+                alert(
+                    'No data to export. Make sure you have selected "CSV" or "JSON" format.',
+                );
+
+                return console.error(
+                    "No blobs to export. How does this happen?",
+                );
             }
 
             if (blobs.length === 1) {
@@ -116,7 +128,7 @@ export default function Home() {
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-            } else if (blobs.length > 1) {
+            } else {
                 // Create ZIP archive for multiple files
                 blobs.forEach(({ name, blob }) => zip.file(name, blob));
                 zip.generateAsync({ type: "blob" }).then((zipBlob) => {
@@ -124,7 +136,7 @@ export default function Home() {
                     const a = document.createElement("a");
 
                     a.href = zipUrl;
-                    a.download = "database_export.zip";
+                    a.download = `${file.name}_export.zip`;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -159,7 +171,7 @@ export default function Home() {
                             onChange={handleFileChange}
                         />
                         <label
-                            className="px-6 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2"
+                            className="px-6 py-2 rounded transition inline-flex items-center gap-2"
                             htmlFor="file-upload"
                             style={{
                                 backgroundColor: "var(--button-bg)",
@@ -190,7 +202,10 @@ export default function Home() {
                             2. Select your chosen output format
                         </h2>
                         <div className="flex justify-center gap-4">
-                            {["CSV", "JSON"].map((option) => {
+                            {[
+                                { key: "CSV", icon: <LuFileSpreadsheet /> },
+                                { key: "JSON", icon: <VscJson /> },
+                            ].map(({ key, icon }) => {
                                 const descriptions: { [key: string]: string } =
                                     {
                                         CSV: "Comma-Separated Values",
@@ -199,41 +214,40 @@ export default function Home() {
 
                                 return (
                                     <label
-                                        key={option}
+                                        key={key}
                                         className={`flex items-center gap-2 px-4 py-2 rounded cursor-pointer transition ${
-                                            selectedKeys.has(option)
-                                                ? "bg-green-500 text-white hover:bg-green-600"
-                                                : "bg-blue-500 text-white hover:bg-blue-600"
+                                            selectedKeys.has(key)
+                                                ? "bg-green-700 text-white hover:bg-green-800"
+                                                : "bg-[var(--button-bg)] text-white hover:bg-blue-800"
                                         }`}
-                                        title={descriptions[option]}
+                                        title={descriptions[key]}
                                     >
                                         <input
-                                            checked={selectedKeys.has(option)}
+                                            checked={selectedKeys.has(key)}
                                             className="form-checkbox hidden"
                                             name="custom-checkbox"
                                             type="checkbox"
-                                            value={option}
+                                            value={key}
                                             onChange={() => {
                                                 const newSelectedKeys = new Set(
                                                     selectedKeys,
                                                 );
 
-                                                newSelectedKeys.has(option)
+                                                newSelectedKeys.has(key)
                                                     ? newSelectedKeys.delete(
-                                                          option,
+                                                          key,
                                                       )
-                                                    : newSelectedKeys.add(
-                                                          option,
-                                                      );
+                                                    : newSelectedKeys.add(key);
                                                 setSelectedKeys(
                                                     new Set(newSelectedKeys),
                                                 );
                                             }}
                                         />
-                                        {selectedKeys.has(option) && (
+                                        {selectedKeys.has(key) && (
                                             <span>&#10003;</span>
                                         )}
-                                        {option}
+                                        {icon}
+                                        {key}
                                     </label>
                                 );
                             })}
@@ -255,6 +269,7 @@ export default function Home() {
                                 backgroundColor: "var(--button-bg)",
                                 color: "var(--button-text-color)",
                             }}
+                            type="button"
                             onClick={handleUpload}
                         >
                             <FaCloudUploadAlt />
