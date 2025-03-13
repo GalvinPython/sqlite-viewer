@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { FaCloudUploadAlt, FaDatabase } from "react-icons/fa";
 import initSqlJs from "sql.js";
+import JSZip from "jszip";
 
 import Navbar from "@/components/Navbar";
 import Questions from "@/components/Questions";
@@ -55,9 +56,10 @@ export default function Home() {
 
             const tableNames = tablesResult[0].values.flat() as string[];
 
-            // Fetch data for each table
-            const dbData: { [key: string]: any[] } = {};
-            let jsonContent: { [key: string]: any[] } = {};
+            // Store files for later download
+            const blobs: { name: string; blob: Blob }[] = [];
+            const zip = new JSZip();
+            const jsonContent: { [key: string]: any[] } = {};
 
             for (const table of tableNames) {
                 const result = database.exec(`SELECT * FROM ${table}`);
@@ -70,55 +72,67 @@ export default function Home() {
                         ),
                     );
 
-                    dbData[table] = rows;
-
-                    if (selectedKeys.has("CSV")) {
-                        // Convert table data to CSV
-                        const csvContent = [
-                            columns.join(","),
-                            ...rows.map((row) =>
-                                columns.map((col) => row[col]).join(","),
-                            ),
-                        ].join("\n");
-
-                        // Create and download CSV file
-                        const blob = new Blob([csvContent], {
-                            type: "text/csv;charset=utf-8;",
-                        });
-
-                        const link = document.createElement("a");
-
-                        link.href = URL.createObjectURL(blob);
-                        link.download = `${table}.csv`;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    }
-
                     if (selectedKeys.has("JSON")) {
                         jsonContent[table] = rows;
                     }
-                } else {
-                    dbData[table] = [];
+
+                    if (selectedKeys.has("CSV")) {
+                        const csvContent = [
+                            columns.join(","), // Header
+                            ...rows.map((row) =>
+                                columns.map((col) => row[col]).join(","),
+                            ), // Rows
+                        ].join("\n");
+
+                        const csvBlob = new Blob([csvContent], {
+                            type: "text/csv;charset=utf-8;",
+                        });
+
+                        blobs.push({ name: `${table}.csv`, blob: csvBlob });
+                    }
                 }
             }
 
-            // Export combined JSON file if selected
             if (selectedKeys.has("JSON")) {
-                const blob = new Blob([JSON.stringify(jsonContent, null, 2)], {
-                    type: "application/json;charset=utf-8;",
-                });
+                const jsonBlob = new Blob(
+                    [JSON.stringify(jsonContent, null, 2)],
+                    {
+                        type: "application/json;charset=utf-8;",
+                    },
+                );
 
-                const link = document.createElement("a");
-
-                link.href = URL.createObjectURL(blob);
-                link.download = `database.json`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                blobs.push({ name: "database.json", blob: jsonBlob });
             }
 
-            console.debug(dbData);
+            if (blobs.length === 1) {
+                // Download single file directly
+                const { name, blob } = blobs[0];
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+
+                a.href = url;
+                a.download = name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } else if (blobs.length > 1) {
+                // Create ZIP archive for multiple files
+                blobs.forEach(({ name, blob }) => zip.file(name, blob));
+                zip.generateAsync({ type: "blob" }).then((zipBlob) => {
+                    const zipUrl = URL.createObjectURL(zipBlob);
+                    const a = document.createElement("a");
+
+                    a.href = zipUrl;
+                    a.download = "database_export.zip";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(zipUrl);
+                });
+            }
+
+            console.debug("Exported blobs:", blobs);
         };
 
         reader.readAsArrayBuffer(file);
