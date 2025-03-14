@@ -4,7 +4,6 @@ export default function Document() {
     return (
         <Html lang="en">
             <Head>
-                {/* i dont care that the meta tags are in the wrong place, this is one page and as long as it works why should i care */}
                 <meta charSet="UTF-8" />
                 <meta
                     content="width=device-width, initial-scale=1.0"

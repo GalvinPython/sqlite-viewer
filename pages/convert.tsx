@@ -106,6 +106,32 @@ export default function Home() {
                 blobs.push({ name: `${file.name}.json`, blob: jsonBlob });
             }
 
+            if (selectedKeys.has("SQL")) {
+                const sqlStatements = tableNames
+                    .map((table) => {
+                        const createTableResult = database.exec(`SELECT sql FROM sqlite_master WHERE type='table' AND name='${table}'`);
+                        const createTableStatement = createTableResult[0]?.values[0][0] as string;
+
+                        const result = database.exec(`SELECT * FROM ${table}`);
+                        if (result.length === 0) return createTableStatement;
+
+                        const columns = result[0].columns;
+                        const rows = result[0].values.map((row) =>
+                            row.map((value) => `'${value}'`).join(","),
+                        );
+
+                        return `${createTableStatement};\nINSERT INTO ${table} (${columns.join(",")}) VALUES ${rows.map((row) => `(${row})`).join(",")};`;
+                    })
+                    .filter((statement) => statement !== "")
+                    .join("\n");
+
+                const sqlBlob = new Blob([sqlStatements], {
+                    type: "application/sql;charset=utf-8;",
+                });
+
+                blobs.push({ name: `${file.name}.sql`, blob: sqlBlob });
+            }
+
             if (blobs.length === 0) {
                 alert(
                     'No data to export. Make sure you have selected "CSV" or "JSON" format.',
@@ -205,11 +231,13 @@ export default function Home() {
                             {[
                                 { key: "CSV", icon: <LuFileSpreadsheet /> },
                                 { key: "JSON", icon: <VscJson /> },
+                                { key: "SQL", icon: <FaDatabase /> },
                             ].map(({ key, icon }) => {
                                 const descriptions: { [key: string]: string } =
                                     {
                                         CSV: "Comma-Separated Values",
                                         JSON: "JavaScript Object Notation",
+                                        SQL: "Structured Query Language",
                                     };
 
                                 return (
