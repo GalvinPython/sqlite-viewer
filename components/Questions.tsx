@@ -23,6 +23,11 @@ const Questions: React.FC = () => {
                         content:
                             "As the database gets visualised in the browser, it can be a bit slow with large files. Please be patient! Of course the site is limited by your system performance, so if you're on a potato, it's gonna be slow.",
                     },
+                    {
+                        title: "I found a bug!",
+                        content:
+                            "There's a link to the GitHub repo above. Please open an issue there!",
+                    },
                 ].map((section, index) => (
                     <div key={index}>
                         <h2 className="text-lg font-semibold mb-4">

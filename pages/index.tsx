@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { FaCloudUploadAlt, FaDatabase } from "react-icons/fa";
 import initSqlJs from "sql.js";
+import Head from "next/head";
 
 import Navbar from "@/components/Navbar";
 import Questions from "@/components/Questions";
@@ -159,82 +160,118 @@ export default function Home() {
     };
 
     return (
-        <div style={{ color: "var(--text-color)" }}>
-            <Navbar />
+        <>
+            <Head>
+                <meta
+                    content="width=device-width, initial-scale=1.0"
+                    name="viewport"
+                />
+                <meta
+                    content="Easily view and explore your SQLite database online for free—no downloads needed. Upload your file and browse data instantly in your web browser."
+                    name="description"
+                />
+                <meta content="index, follow" name="robots" />
+                <title>SQLite Database Viewer</title>
+                <meta content="SQLite Database Viewer" property="og:title" />
+                <meta
+                    content="Need to inspect an SQLite database without hassle? Our free online viewer lets you upload and browse your data instantly—no downloads, no setup. Open, search, and analyze your database right in your web browser with ease!"
+                    property="og:description"
+                />
+                <meta content="website" property="og:type" />
+                <meta content="https://sqlitereader.com" property="og:url" />
+                <meta
+                    content="https://api.microlink.io/?url=https://sqlitereader.com/&amp;screenshot=true&amp;embed=screenshot.url&amp;overlay.browser=dark"
+                    property="og:image"
+                />
+                <meta content="summary_large_image" name="twitter:card" />
+                <meta content="SQLite Database Viewer" name="twitter:title" />
+                <meta
+                    content="Need to inspect an SQLite database without hassle? Our free online viewer lets you upload and browse your data instantly—no downloads, no setup. Open, search, and analyze your database right in your web browser with ease!"
+                    name="twitter:description"
+                />
+                <meta
+                    content="https://api.microlink.io/?url=https://sqlitereader.com/&amp;screenshot=true&amp;embed=screenshot.url&amp;overlay.browser=dark"
+                    name="twitter:image"
+                />
+            </Head>
+            <div style={{ color: "var(--text-color)" }}>
+                <Navbar />
 
-            <div className="flex justify-center mb-12">
-                <div
-                    className="w-full max-w-3xl p-6 shadow rounded-lg"
-                    style={{ backgroundColor: "var(--upload-box-bg)" }}
-                >
-                    <h2 className="text-lg text-center font-semibold mb-4">
-                        Upload SQLite File
-                    </h2>
-                    <div className="flex flex-col items-center gap-4">
-                        <input
-                            accept=".db,.sqlite,.sqlite3"
-                            className="hidden"
-                            id="file-upload"
-                            type="file"
-                            onChange={handleFileChange}
+                <div className="flex justify-center mb-12">
+                    <div
+                        className="w-full max-w-3xl p-6 shadow rounded-lg"
+                        style={{ backgroundColor: "var(--upload-box-bg)" }}
+                    >
+                        <h2 className="text-lg text-center font-semibold mb-4">
+                            Upload SQLite File
+                        </h2>
+                        <div className="flex flex-col items-center gap-4">
+                            <input
+                                accept=".db,.sqlite,.sqlite3"
+                                className="hidden"
+                                id="file-upload"
+                                type="file"
+                                onChange={handleFileChange}
+                            />
+                            <label
+                                className="px-6 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2"
+                                htmlFor="file-upload"
+                                style={{
+                                    backgroundColor: "var(--button-bg)",
+                                    color: "var(--button-text-color)",
+                                }}
+                            >
+                                <FaDatabase />
+                                Choose File
+                            </label>
+                            {file && (
+                                <p className="text-sm">
+                                    Selected File:{" "}
+                                    <span className="font-semibold">
+                                        {file.name}
+                                    </span>
+                                </p>
+                            )}
+                            <button
+                                className="px-6 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2 mb-4"
+                                style={{
+                                    backgroundColor: "var(--button-bg)",
+                                    color: "var(--button-text-color)",
+                                }}
+                                onClick={handleUpload}
+                            >
+                                <FaCloudUploadAlt />
+                                Upload File
+                            </button>
+                        </div>
+
+                        <p className="text-lg font-semibold mb-4 text-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent">
+                            Update: There is no upload limit anymore, it&apos;s
+                            all done in your browser! Better for security and
+                            privacy.
+                        </p>
+                    </div>
+                </div>
+
+                {data ? (
+                    <div className="mb-8">
+                        <Tabs
+                            activeTab={activeTab}
+                            tabs={Object.keys(data)}
+                            onTabChange={setActiveTab}
                         />
-                        <label
-                            className="px-6 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2"
-                            htmlFor="file-upload"
-                            style={{
-                                backgroundColor: "var(--button-bg)",
-                                color: "var(--button-text-color)",
-                            }}
-                        >
-                            <FaDatabase />
-                            Choose File
-                        </label>
-                        {file && (
-                            <p className="text-sm">
-                                Selected File:{" "}
-                                <span className="font-semibold">
-                                    {file.name}
-                                </span>
-                            </p>
-                        )}
-                        <button
-                            className="px-6 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2 mb-4"
-                            style={{
-                                backgroundColor: "var(--button-bg)",
-                                color: "var(--button-text-color)",
-                            }}
-                            onClick={handleUpload}
-                        >
-                            <FaCloudUploadAlt />
-                            Upload File
-                        </button>
+                        <div className="mt-6">
+                            {activeTab && renderTable(data[activeTab])}
+                        </div>
                     </div>
-
-                    <p className="text-lg font-semibold mb-4 text-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent">
-                        Update: There is no upload limit anymore, it&apos;s all
-                        done in your browser! Better for security and privacy.
+                ) : (
+                    <p className="text-center font-bold mb-8">
+                        Upload a SQLite file to visualize its content.
                     </p>
-                </div>
+                )}
+
+                <Questions />
             </div>
-
-            {data ? (
-                <div className="mb-8">
-                    <Tabs
-                        activeTab={activeTab}
-                        tabs={Object.keys(data)}
-                        onTabChange={setActiveTab}
-                    />
-                    <div className="mt-6">
-                        {activeTab && renderTable(data[activeTab])}
-                    </div>
-                </div>
-            ) : (
-                <p className="text-center font-bold mb-8">
-                    Upload a SQLite file to visualize its content.
-                </p>
-            )}
-
-            <Questions />
-        </div>
+        </>
     );
 }
