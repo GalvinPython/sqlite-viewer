@@ -3,19 +3,13 @@
 
 # next.js
 /.next/
-/out/
-
-# production
-/build
 
 # million
 .million/
 
-# tmp
-tmp/
-
-# sqlite stuff :p
-*.sqlite3
+# other stuff
+ads.txt
 
 # private testing stuff :p
 h.ts
+*.sqlite3
