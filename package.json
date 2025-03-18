@@ -7,7 +7,8 @@
         "build": "next build",
         "start": "next start --port 8010",
         "lint": "eslint . --ext .ts,.tsx -c .eslintrc.json",
-        "lint:fix": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix"
+        "lint:fix": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix",
+        "updatesql": "cp ./node_modules/sql.js/dist/sql-wasm.wasm ./public/sql-wasm.wasm"
     },
     "dependencies": {
         "@million/lint": "^1.0.14",
@@ -17,7 +18,7 @@
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-icons": "^5.4.0",
-        "sql.js": "^1.12.0"
+        "sql.js": "1.13.0"
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3",

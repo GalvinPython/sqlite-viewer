@@ -1,5 +1,7 @@
 import { Html, Main, Head, NextScript } from "next/document";
 
+import Footer from "@/components/Footer";
+
 export default function Document() {
     return (
         <>
@@ -8,7 +10,7 @@ export default function Document() {
             </Head>
             <Html lang="en">
                 <body
-                    className="antialiased"
+                    className="antialiased flex flex-col min-h-screen"
                     style={{
                         backgroundColor: "var(--background-color)",
                         color: "var(--text-color)",
@@ -16,6 +18,7 @@ export default function Document() {
                 >
                     <Main />
                     <NextScript />
+                    <Footer />
                 </body>
             </Html>
         </>

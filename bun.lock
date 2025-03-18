@@ -11,7 +11,7 @@
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-icons": "^5.4.0",
-        "sql.js": "^1.12.0",
+        "sql.js": "1.13.0",
       },
       "devDependencies": {
         "@eslint/eslintrc": "^3",
@@ -1085,7 +1085,7 @@
 
     "source-map-js": ["source-map-js@1.2.1", "", {}, "sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA=="],
 
-    "sql.js": ["sql.js@1.12.0", "", {}, "sha512-Bi+43yMx/tUFZVYD4AUscmdL6NHn3gYQ+CM+YheFWLftOmrEC/Mz6Yh7E96Y2WDHYz3COSqT+LP6Z79zgrwJlA=="],
+    "sql.js": ["sql.js@1.13.0", "", {}, "sha512-RJbVP1HRDlUUXahJ7VMTcu9Rm1Nzw+EBpoPr94vnbD4LwR715F3CcxE2G2k45PewcaZ57pjetYa+LoSJLAASgA=="],
 
     "stable-hash": ["stable-hash@0.0.4", "", {}, "sha512-LjdcbuBeLcdETCrPn9i8AYAZ1eCtu4ECAWtP7UleOiZ9LzVxRzzUZEoZ8zB24nhkQnDWyET0I+3sWokSDS3E7g=="],
 
