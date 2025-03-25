@@ -179,20 +179,14 @@ export default function Home() {
                 />
                 <meta content="website" property="og:type" />
                 <meta content="https://sqlitereader.com" property="og:url" />
-                <meta
-                    content="https://api.microlink.io/?url=https://sqlitereader.com/&amp;screenshot=true&amp;embed=screenshot.url&amp;overlay.browser=dark"
-                    property="og:image"
-                />
+                <meta content="./screenshot_home.png" property="og:image" />
                 <meta content="summary_large_image" name="twitter:card" />
                 <meta content="SQLite Database Viewer" name="twitter:title" />
                 <meta
                     content="Need to inspect an SQLite database without hassle? Our free online viewer lets you upload and browse your data instantly—no downloads, no setup. Open, search, and analyze your database right in your web browser with ease!"
                     name="twitter:description"
                 />
-                <meta
-                    content="https://api.microlink.io/?url=https://sqlitereader.com/&amp;screenshot=true&amp;embed=screenshot.url&amp;overlay.browser=dark"
-                    name="twitter:image"
-                />
+                <meta content="./screenshot_home.png" name="twitter:image" />
             </Head>
             <div style={{ color: "var(--text-color)" }}>
                 <Navbar />

@@ -202,20 +202,14 @@ export default function Home() {
                 />
                 <meta content="website" property="og:type" />
                 <meta content="https://sqlitereader.com" property="og:url" />
-                <meta
-                    content="https://api.microlink.io/?url=https://sqlitereader.com/convert&amp;screenshot=true&amp;embed=screenshot.url&amp;overlay.browser=dark"
-                    property="og:image"
-                />
+                <meta content="./screenshot_convert.png" property="og:image" />
                 <meta content="summary_large_image" name="twitter:card" />
                 <meta content="SQLite Database Viewer" name="twitter:title" />
                 <meta
                     content="Easily convert and export your SQLite database to CSV, JSON, SQL, and more — right in your web browser! No downloads, no setup. Just upload your file, select a format, and export your data instantly, all for free!"
                     name="twitter:description"
                 />
-                <meta
-                    content="https://api.microlink.io/?url=https://sqlitereader.com/convert&amp;screenshot=true&amp;embed=screenshot.url&amp;overlay.browser=dark"
-                    name="twitter:image"
-                />
+                <meta content="./screenshot_convert.png" name="twitter:image" />
             </Head>
             <div style={{ color: "var(--text-color)" }}>
                 <Navbar />

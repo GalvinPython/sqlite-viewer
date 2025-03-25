@@ -8,13 +8,15 @@
         "start": "next start --port 8010",
         "lint": "eslint . --ext .ts,.tsx -c .eslintrc.json",
         "lint:fix": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix",
-        "updatesql": "cp ./node_modules/sql.js/dist/sql-wasm.wasm ./public/sql-wasm.wasm"
+        "updatesql": "cp ./node_modules/sql.js/dist/sql-wasm.wasm ./public/sql-wasm.wasm",
+        "embed": "bun embed.ts"
     },
     "dependencies": {
         "@million/lint": "^1.0.14",
         "bun-types": "^1.1.39",
         "jszip": "^3.10.1",
         "next": "15.2.3",
+        "puppeteer": "^24.4.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-icons": "^5.4.0",
@@ -29,6 +31,7 @@
         "@types/sql.js": "^1.4.9",
         "@typescript-eslint/eslint-plugin": "7.2.0",
         "@typescript-eslint/parser": "7.2.0",
+        "concurrently": "^9.1.2",
         "eslint": "^8.57.0",
         "eslint-config-next": "15.1.0",
         "eslint-config-prettier": "^8.2.0",
