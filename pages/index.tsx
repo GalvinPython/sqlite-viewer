@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FaCloudUploadAlt, FaDatabase } from "react-icons/fa";
+import { FaDatabase } from "react-icons/fa";
 import initSqlJs from "sql.js";
 import Head from "next/head";
 
@@ -52,60 +52,58 @@ export default function Home() {
         document.documentElement.classList.toggle("dark", isDarkMode);
     }, [isDarkMode]);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
-            setFile(e.target.files[0]);
-        }
-    };
+            const selectedFile = e.target.files[0];
 
-    const handleUpload = async () => {
-        if (!file) return alert("Please select a file first.");
+            setFile(selectedFile);
 
-        const reader = new FileReader();
+            const reader = new FileReader();
 
-        reader.onload = async (e) => {
-            const arrayBuffer = e.target?.result as ArrayBuffer;
+            reader.onload = async (event) => {
+                const arrayBuffer = event.target?.result as ArrayBuffer;
 
-            if (!arrayBuffer) return;
+                if (!arrayBuffer) return;
 
-            const SQL = await initSqlJs();
-            const database = new SQL.Database(new Uint8Array(arrayBuffer));
+                const SQL = await initSqlJs();
+                const database = new SQL.Database(new Uint8Array(arrayBuffer));
 
-            // Get all table names
-            const tablesResult = database.exec(
-                "SELECT name FROM sqlite_master WHERE type='table'",
-            );
+                // Get all table names
+                const tablesResult = database.exec(
+                    "SELECT name FROM sqlite_master WHERE type='table'",
+                );
 
-            if (tablesResult.length === 0) return;
+                if (tablesResult.length === 0) return;
 
-            const tableNames = tablesResult[0].values.flat() as string[];
+                const tableNames = tablesResult[0].values.flat() as string[];
 
-            setActiveTab(tableNames[0]); // Set the first table as active
+                setActiveTab(tableNames[0]); // Set the first table as active
 
-            // Fetch data for each table
-            const dbData: { [key: string]: any[] } = {};
+                // Fetch data for each table
+                const dbData: { [key: string]: any[] } = {};
 
-            for (const table of tableNames) {
-                const result = database.exec(`SELECT * FROM ${table}`);
+                for (const table of tableNames) {
+                    const result = database.exec(`SELECT * FROM ${table}`);
 
-                if (result.length > 0) {
-                    const columns = result[0].columns;
-                    const rows = result[0].values.map((row) =>
-                        Object.fromEntries(
-                            columns.map((col, i) => [col, row[i]]),
-                        ),
-                    );
+                    if (result.length > 0) {
+                        const columns = result[0].columns;
+                        const rows = result[0].values.map((row) =>
+                            Object.fromEntries(
+                                columns.map((col, i) => [col, row[i]]),
+                            ),
+                        );
 
-                    dbData[table] = rows;
-                } else {
-                    dbData[table] = [];
+                        dbData[table] = rows;
+                    } else {
+                        dbData[table] = [];
+                    }
                 }
-            }
 
-            setData(dbData);
-        };
+                setData(dbData);
+            };
 
-        reader.readAsArrayBuffer(file);
+            reader.readAsArrayBuffer(selectedFile);
+        }
     };
 
     const renderTable = (tableData: any[]) => {
@@ -171,22 +169,34 @@ export default function Home() {
                     name="description"
                 />
                 <meta content="index, follow" name="robots" />
-                <title>SQLite Database Viewer</title>
-                <meta content="SQLite Database Viewer" property="og:title" />
+                <title>Free Online SQLite Database Viewer</title>
+                <meta
+                    content="Free Online SQLite Database Viewer"
+                    property="og:title"
+                />
                 <meta
                     content="Need to inspect an SQLite database without hassle? Our free online viewer lets you upload and browse your data instantly—no downloads, no setup. Open, search, and analyze your database right in your web browser with ease!"
                     property="og:description"
                 />
                 <meta content="website" property="og:type" />
                 <meta content="https://sqlitereader.com" property="og:url" />
-                <meta content="./screenshot_home.png" property="og:image" />
+                <meta
+                    content="https://sqlitereader.com/screenshot_home.png"
+                    property="og:image"
+                />
                 <meta content="summary_large_image" name="twitter:card" />
-                <meta content="SQLite Database Viewer" name="twitter:title" />
+                <meta
+                    content="Free Online SQLite Database Viewer"
+                    name="twitter:title"
+                />
                 <meta
                     content="Need to inspect an SQLite database without hassle? Our free online viewer lets you upload and browse your data instantly—no downloads, no setup. Open, search, and analyze your database right in your web browser with ease!"
                     name="twitter:description"
                 />
-                <meta content="./screenshot_home.png" name="twitter:image" />
+                <meta
+                    content="https://sqlitereader.com/screenshot_home.png"
+                    name="twitter:image"
+                />
             </Head>
             <div style={{ color: "var(--text-color)" }}>
                 <Navbar />
@@ -208,7 +218,7 @@ export default function Home() {
                                 onChange={handleFileChange}
                             />
                             <label
-                                className="px-6 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2"
+                                className="px-6 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2 mb-4"
                                 htmlFor="file-upload"
                                 style={{
                                     backgroundColor: "var(--button-bg)",
@@ -226,17 +236,6 @@ export default function Home() {
                                     </span>
                                 </p>
                             )}
-                            <button
-                                className="px-6 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2 mb-4"
-                                style={{
-                                    backgroundColor: "var(--button-bg)",
-                                    color: "var(--button-text-color)",
-                                }}
-                                onClick={handleUpload}
-                            >
-                                <FaCloudUploadAlt />
-                                Upload File
-                            </button>
                         </div>
 
                         <p className="text-lg font-semibold mb-4 text-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent">
