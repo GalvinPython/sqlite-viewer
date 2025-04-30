@@ -13,3 +13,6 @@ ads.txt
 # private testing stuff :p
 h.ts
 *.sqlite3
+
+# build
+out/

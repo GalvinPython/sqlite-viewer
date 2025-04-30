@@ -5,6 +5,7 @@ import MillionLint from "@million/lint";
 const nextConfig: NextConfig = {
     /* config options here */
     reactStrictMode: true,
+    output: "export",
     webpack: (config) => {
         config.resolve.fallback = {
             fs: false,
