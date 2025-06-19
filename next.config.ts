@@ -13,17 +13,7 @@ const nextConfig: NextConfig = {
 
         return config;
     },
-    eslint: {
-        ignoreDuringBuilds: true,
-    },
 };
-
-if (process.env.NODE_ENV === "production") {
-    nextConfig.eslint = {
-        ...nextConfig.eslint,
-        ignoreDuringBuilds: true,
-    };
-}
 
 export default MillionLint.next({
     enabled: true,
