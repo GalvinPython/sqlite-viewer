@@ -15,7 +15,7 @@
         "@million/lint": "^1.0.14",
         "bun-types": "^1.1.39",
         "jszip": "^3.10.1",
-        "next": "15.3.5",
+        "next": "15.4.2",
         "puppeteer": "^24.4.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
