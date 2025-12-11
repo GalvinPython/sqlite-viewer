@@ -1,6 +1,7 @@
 version: 2
 updates:
-  - package-ecosystem: "bun"
+  # testing npm because bun doesnt work for some reason?
+  - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"

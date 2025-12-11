@@ -13,12 +13,18 @@ import puppeteer from "puppeteer";
     await page.setViewport({ width: 1920, height: 1080 });
 
     await page.screenshot({
-        path: path.resolve(__dirname, "./public/screenshot_home.png"),
+        path: path.resolve(
+            __dirname,
+            "./public/screenshot_home.png",
+        ) as `${string}.png`,
     });
 
     await page.goto("http://localhost:8010/convert");
     await page.screenshot({
-        path: path.resolve(__dirname, "./public/screenshot_convert.png"),
+        path: path.resolve(
+            __dirname,
+            "./public/screenshot_convert.png",
+        ) as `${string}.png`,
     });
 
     await browser.close();
