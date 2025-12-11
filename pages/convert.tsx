@@ -15,6 +15,7 @@ export default function Home() {
     const [file, setFile] = useState<File | null>(null);
     const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
     const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
         const systemPrefersDark = window.matchMedia(
@@ -46,6 +47,7 @@ export default function Home() {
             const arrayBuffer = e.target?.result as ArrayBuffer;
 
             if (!arrayBuffer) return;
+            setIsLoading(true);
 
             const SQL = await initSqlJs();
             const database = new SQL.Database(new Uint8Array(arrayBuffer));
@@ -159,6 +161,7 @@ export default function Home() {
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
+                setIsLoading(false);
             } else {
                 // Create ZIP archive for multiple files
                 blobs.forEach(({ name, blob }) => zip.file(name, blob));
@@ -172,6 +175,7 @@ export default function Home() {
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(zipUrl);
+                    setIsLoading(false);
                 });
             }
 
@@ -227,6 +231,20 @@ export default function Home() {
             </Head>
             <div style={{ color: "var(--text-color)" }}>
                 <Navbar />
+
+                {isLoading && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                        <div className="flex items-center gap-3 rounded-md bg-white dark:bg-gray-800 px-4 py-3 shadow">
+                            <span
+                                aria-hidden="true"
+                                className="h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"
+                            />
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                                Converting…
+                            </span>
+                        </div>
+                    </div>
+                )}
 
                 <div className="flex justify-center mb-12">
                     <div

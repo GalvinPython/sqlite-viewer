@@ -39,6 +39,7 @@ export default function Home() {
     const [data, setData] = useState<{ [key: string]: any[] } | null>(null);
     const [activeTab, setActiveTab] = useState<string>("");
     const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
         const systemPrefersDark = window.matchMedia(
@@ -64,6 +65,8 @@ export default function Home() {
                 const arrayBuffer = event.target?.result as ArrayBuffer;
 
                 if (!arrayBuffer) return;
+
+                setIsLoading(true);
 
                 const SQL = await initSqlJs();
                 const database = new SQL.Database(new Uint8Array(arrayBuffer));
@@ -100,6 +103,7 @@ export default function Home() {
                 }
 
                 setData(dbData);
+                setIsLoading(false);
             };
 
             reader.readAsArrayBuffer(selectedFile);
@@ -200,6 +204,20 @@ export default function Home() {
             </Head>
             <div style={{ color: "var(--text-color)" }}>
                 <Navbar />
+
+                {isLoading && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                        <div className="flex items-center gap-3 rounded-md bg-white dark:bg-gray-800 px-4 py-3 shadow">
+                            <span
+                                aria-hidden="true"
+                                className="h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"
+                            />
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                                Loading database…
+                            </span>
+                        </div>
+                    </div>
+                )}
 
                 <div className="flex justify-center mb-12">
                     <div
