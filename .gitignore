@@ -16,3 +16,6 @@ h.ts
 
 # build
 out/
+
+# testing data
+data/

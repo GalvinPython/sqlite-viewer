@@ -1,0 +1,38 @@
+name: Update sql.js
+
+on:
+    push:
+        branches:
+            - "*"
+        paths:
+            - "package.json"
+
+jobs:
+    lint:
+        name: Update sql.js
+        runs-on: ubuntu-slim
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Setup Bun
+              uses: oven-sh/setup-bun@v1
+
+            - name: Install dependencies
+              run: bun install
+
+            - name: Run SQL.js update script
+              run: bun run updatesql
+
+            - name: Commit and push changes
+              run: |
+                  git config --global user.name "github-actions[bot]"
+                  git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git add .
+                  if git diff --cached --quiet; then
+                    echo "No changes to commit"
+                    exit 0
+                  fi
+                  git commit -m "Update sql.js version"
+                  git push origin main
