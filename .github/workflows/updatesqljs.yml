@@ -3,7 +3,7 @@ name: Update sql.js
 on:
     push:
         branches:
-            - "*"
+            - "**" 
         paths:
             - "package.json"
 

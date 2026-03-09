@@ -6,7 +6,8 @@ const Footer: React.FC = () => {
             <div className="container mx-auto flex flex-col md:flex-row justify-between items-center min-h-[100px]">
                 <div className="flex flex-col gap-1">
                     <p className="text-sm">
-                        SQLite Reader is open-sourced and licensed under the MIT License
+                        SQLite Reader is open-sourced and licensed under the MIT
+                        License
                     </p>
                     <p className="text-xs text-gray-400">
                         Commit: {process.env.NEXT_PUBLIC_GIT_SHA || "unknown"}

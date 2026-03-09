@@ -7,17 +7,19 @@ import { LuFileSpreadsheet } from "react-icons/lu";
 import initSqlJs from "sql.js";
 import JSZip from "jszip";
 import Head from "next/head";
+import { SiSqlite } from "react-icons/si";
+import { FiFile } from "react-icons/fi";
 
 import Navbar from "@/components/Navbar";
 import Questions from "@/components/Questions";
-import { SiSqlite } from "react-icons/si";
-import { FiFile } from "react-icons/fi";
 
 export default function Home() {
     const [file, setFile] = useState<File | null>(null);
     const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
     const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
-    const [disabledKeys, setDisabledKeys] = useState<Set<string>>(new Set(["CSV", "JSON", "SQL", "SQLite"]));
+    const [disabledKeys, setDisabledKeys] = useState<Set<string>>(
+        new Set(["CSV", "JSON", "SQL", "SQLite"]),
+    );
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
@@ -36,6 +38,7 @@ export default function Home() {
         if (!file) {
             setDisabledKeys(new Set(["CSV", "JSON", "SQL", "SQLite"]));
             setSelectedKeys(new Set());
+
             return;
         }
 
@@ -58,6 +61,7 @@ export default function Home() {
             const next = new Set(prev);
 
             disabled.forEach((k) => next.delete(k));
+
             return next;
         });
     }, [file]);
@@ -87,10 +91,12 @@ export default function Home() {
                 } catch (err) {
                     alert(`Failed to execute SQL: ${(err as Error).message}`);
                     setIsLoading(false);
+
                     return;
                 }
 
                 const exported = database.export();
+
                 database.close();
 
                 const blob = new Blob([exported.buffer as ArrayBuffer], {
@@ -109,6 +115,7 @@ export default function Home() {
             } finally {
                 setIsLoading(false);
             }
+
             return;
         }
 
@@ -133,9 +140,18 @@ export default function Home() {
 
             if (tablesResult.length === 0) return;
 
-            const INTERNAL_TABLES = new Set(["sqlite_sequence", "sqlite_stat1", "sqlite_stat2", "sqlite_stat3", "sqlite_stat4"]);
-            const tableNames = (tablesResult[0].values.flat() as string[]).filter(
-                (name) => !INTERNAL_TABLES.has(name) && !name.startsWith("sqlite_"),
+            const INTERNAL_TABLES = new Set([
+                "sqlite_sequence",
+                "sqlite_stat1",
+                "sqlite_stat2",
+                "sqlite_stat3",
+                "sqlite_stat4",
+            ]);
+            const tableNames = (
+                tablesResult[0].values.flat() as string[]
+            ).filter(
+                (name) =>
+                    !INTERNAL_TABLES.has(name) && !name.startsWith("sqlite_"),
             );
 
             // Store files for later download
@@ -363,7 +379,9 @@ export default function Home() {
                         </div>
 
                         <p className="font-semibold mb-4 text-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent mt-4">
-                            Supported formats: .db, .sqlite, .sqlite3 for SQLite files; .sql for SQL dump files. CSV and JSON uploads are not supported yet.
+                            Supported formats: .db, .sqlite, .sqlite3 for SQLite
+                            files; .sql for SQL dump files. CSV and JSON uploads
+                            are not supported yet.
                         </p>
 
                         <div className="flex flex-col items-center gap-4 text-center">
@@ -389,10 +407,11 @@ export default function Home() {
                                     return (
                                         <label
                                             key={key}
-                                            className={`${disabledKeys.has(key) ? "opacity-50 cursor-not-allowed" : ""} flex items-center gap-2 px-4 py-2 rounded cursor-pointer transition ${selectedKeys.has(key)
-                                                ? "bg-green-700 text-white hover:bg-green-800"
-                                                : "bg-[var(--button-bg)] text-white hover:bg-blue-800"
-                                                }`}
+                                            className={`${disabledKeys.has(key) ? "opacity-50 cursor-not-allowed" : ""} flex items-center gap-2 px-4 py-2 rounded cursor-pointer transition ${
+                                                selectedKeys.has(key)
+                                                    ? "bg-green-700 text-white hover:bg-green-800"
+                                                    : "bg-[var(--button-bg)] text-white hover:bg-blue-800"
+                                            }`}
                                             title={descriptions[key]}
                                         >
                                             <input
@@ -402,17 +421,18 @@ export default function Home() {
                                                 type="checkbox"
                                                 value={key}
                                                 onChange={() => {
-                                                    if (disabledKeys.has(key)) return;
+                                                    if (disabledKeys.has(key))
+                                                        return;
                                                     const newSelectedKeys =
                                                         new Set(selectedKeys);
 
                                                     newSelectedKeys.has(key)
                                                         ? newSelectedKeys.delete(
-                                                            key,
-                                                        )
+                                                              key,
+                                                          )
                                                         : newSelectedKeys.add(
-                                                            key,
-                                                        );
+                                                              key,
+                                                          );
                                                     setSelectedKeys(
                                                         new Set(
                                                             newSelectedKeys,
@@ -447,8 +467,12 @@ export default function Home() {
                                     backgroundColor: "var(--button-bg)",
                                     color: "var(--button-text-color)",
                                 }}
+                                title={
+                                    selectedKeys.size === 0
+                                        ? "Please select at least one output format"
+                                        : "Convert your file to the selected format(s)"
+                                }
                                 type="button"
-                                title={selectedKeys.size === 0 ? "Please select at least one output format" : "Convert your file to the selected format(s)"}
                                 onClick={handleUpload}
                             >
                                 <FaCloudUploadAlt />

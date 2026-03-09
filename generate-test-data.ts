@@ -3,23 +3,76 @@
  * Run with: bun run generate-test-data.ts
  */
 
-import { Database } from "bun:sqlite";
 import { randomUUID } from "crypto";
 
+import { Database } from "bun:sqlite";
+
 const FIRST_NAMES = [
-    "Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Hank",
-    "Isla", "Jack", "Karen", "Leo", "Mia", "Nate", "Olivia", "Paul",
-    "Quinn", "Rachel", "Sam", "Tara",
+    "Alice",
+    "Bob",
+    "Charlie",
+    "Diana",
+    "Eve",
+    "Frank",
+    "Grace",
+    "Hank",
+    "Isla",
+    "Jack",
+    "Karen",
+    "Leo",
+    "Mia",
+    "Nate",
+    "Olivia",
+    "Paul",
+    "Quinn",
+    "Rachel",
+    "Sam",
+    "Tara",
 ];
 
 const LAST_NAMES = [
-    "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller",
-    "Davis", "Martinez", "Wilson", "Anderson", "Taylor", "Thomas", "Moore",
-    "Jackson", "White", "Harris", "Martin", "Thompson", "Young",
+    "Smith",
+    "Johnson",
+    "Williams",
+    "Brown",
+    "Jones",
+    "Garcia",
+    "Miller",
+    "Davis",
+    "Martinez",
+    "Wilson",
+    "Anderson",
+    "Taylor",
+    "Thomas",
+    "Moore",
+    "Jackson",
+    "White",
+    "Harris",
+    "Martin",
+    "Thompson",
+    "Young",
 ];
 
-const DEPARTMENTS = ["Engineering", "Marketing", "Sales", "HR", "Finance", "Design", "Legal", "Support"];
-const CITIES = ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego"];
+const DEPARTMENTS = [
+    "Engineering",
+    "Marketing",
+    "Sales",
+    "HR",
+    "Finance",
+    "Design",
+    "Legal",
+    "Support",
+];
+const CITIES = [
+    "New York",
+    "Los Angeles",
+    "Chicago",
+    "Houston",
+    "Phoenix",
+    "Philadelphia",
+    "San Antonio",
+    "San Diego",
+];
 const STATUSES = ["active", "inactive", "pending", "suspended"];
 
 function randomItem<T>(arr: T[]): T {
@@ -34,6 +87,7 @@ function randomDate(startYear: number, endYear: number): string {
     const start = new Date(startYear, 0, 1).getTime();
     const end = new Date(endYear, 11, 31).getTime();
     const d = new Date(start + Math.random() * (end - start));
+
     return d.toISOString().split("T")[0];
 }
 
@@ -75,12 +129,22 @@ const insertProduct = db.prepare(`
     VALUES ($name, $sku, $price, $stock, $category, $created_at)
 `);
 
-const CATEGORIES = ["Electronics", "Clothing", "Books", "Home & Garden", "Toys", "Sports", "Automotive", "Beauty"];
+const CATEGORIES = [
+    "Electronics",
+    "Clothing",
+    "Books",
+    "Home & Garden",
+    "Toys",
+    "Sports",
+    "Automotive",
+    "Beauty",
+];
 
 const insertEmployees = db.transaction(() => {
     for (let i = 0; i < 100; i++) {
         const first = randomItem(FIRST_NAMES);
         const last = randomItem(LAST_NAMES);
+
         insertEmployee.run({
             $uuid: randomUUID(),
             $first_name: first,
@@ -88,7 +152,9 @@ const insertEmployees = db.transaction(() => {
             $email: `${first.toLowerCase()}.${last.toLowerCase()}${randomInt(1, 999)}@example.com`,
             $department: randomItem(DEPARTMENTS),
             $city: randomItem(CITIES),
-            $salary: parseFloat((randomInt(30000, 150000) + Math.random()).toFixed(2)),
+            $salary: parseFloat(
+                (randomInt(30000, 150000) + Math.random()).toFixed(2),
+            ),
             $age: randomInt(22, 65),
             $hire_date: randomDate(2010, 2025),
             $status: randomItem(STATUSES),
@@ -99,6 +165,7 @@ const insertEmployees = db.transaction(() => {
 const insertProducts = db.transaction(() => {
     for (let i = 0; i < 100; i++) {
         const category = randomItem(CATEGORIES);
+
         insertProduct.run({
             $name: `${category} Product ${randomInt(100, 999)}`,
             $sku: `SKU-${randomUUID().slice(0, 8).toUpperCase()}`,

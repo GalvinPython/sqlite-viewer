@@ -1,12 +1,13 @@
 import type { NextConfig } from "next";
 
+import { execSync } from "child_process";
+
 import MillionLint from "@million/lint";
 
 // Show git commit hash in the website
-import { execSync } from 'child_process';
 
 // Fetch the short Git SHA at build time
-const gitSha = execSync('git rev-parse --short HEAD').toString().trim();
+const gitSha = execSync("git rev-parse --short HEAD").toString().trim();
 
 const nextConfig: NextConfig = {
     /* config options here */
