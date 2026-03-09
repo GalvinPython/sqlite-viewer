@@ -1,32 +1,32 @@
 name: ESLint Check
 
 on:
-   push:
-     branches:
-       - '*'
-     paths:
-       - "**/*.js"
-       - "**/*.jsx"
-       - "**/*.ts"
-       - "**/*.tsx"
-       - "**/*.mjs"
-   pull_request:
-     types: [opened, reopened, synchronize]
+    push:
+        branches:
+            - "*"
+        paths:
+            - "**/*.js"
+            - "**/*.jsx"
+            - "**/*.ts"
+            - "**/*.tsx"
+            - "**/*.mjs"
+    pull_request:
+        types: [opened, reopened, synchronize]
 
 jobs:
-  lint:
-    name: ESLint
-    runs-on: ubuntu-latest
+    lint:
+        name: ESLint
+        runs-on: ubuntu-slim
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+            - name: Setup Bun
+              uses: oven-sh/setup-bun@v1
 
-      - name: Install dependencies
-        run: bun install
+            - name: Install dependencies
+              run: bun install
 
-      - name: Run ESLint
-        run: bun run lint
+            - name: Run ESLint
+              run: bun run lint
