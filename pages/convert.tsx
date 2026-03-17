@@ -7,6 +7,8 @@ import { LuFileSpreadsheet } from "react-icons/lu";
 import initSqlJs from "sql.js";
 import JSZip from "jszip";
 import Head from "next/head";
+import { SiSqlite } from "react-icons/si";
+import { FiFile } from "react-icons/fi";
 
 import Navbar from "@/components/Navbar";
 import Questions from "@/components/Questions";
@@ -15,6 +17,9 @@ export default function Home() {
     const [file, setFile] = useState<File | null>(null);
     const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
     const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+    const [disabledKeys, setDisabledKeys] = useState<Set<string>>(
+        new Set(["CSV", "JSON", "SQL", "SQLite"]),
+    );
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
@@ -29,6 +34,38 @@ export default function Home() {
         document.documentElement.classList.toggle("dark", isDarkMode);
     }, [isDarkMode]);
 
+    useEffect(() => {
+        if (!file) {
+            setDisabledKeys(new Set(["CSV", "JSON", "SQL", "SQLite"]));
+            setSelectedKeys(new Set());
+
+            return;
+        }
+
+        const ext = file.name.split(".").pop()?.toLowerCase();
+        const isSqlite = ext === "db" || ext === "sqlite" || ext === "sqlite3";
+
+        if (isSqlite) {
+            // SQLite can export to everything except SQLite itself
+            setDisabledKeys(new Set(["SQLite"]));
+        } else {
+            // CSV / JSON / SQL files can only convert to SQLite
+            setDisabledKeys(new Set(["CSV", "JSON", "SQL"]));
+        }
+
+        // Drop any selected keys that are now disabled
+        setSelectedKeys((prev) => {
+            const disabled = isSqlite
+                ? new Set(["SQLite"])
+                : new Set(["CSV", "JSON", "SQL"]);
+            const next = new Set(prev);
+
+            disabled.forEach((k) => next.delete(k));
+
+            return next;
+        });
+    }, [file]);
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             setFile(e.target.files[0]);
@@ -39,6 +76,50 @@ export default function Home() {
         if (!file) return alert("Please select a file first.");
         if (!selectedKeys.size) return alert("Please select an output format.");
 
+        const ext = file.name.split(".").pop()?.toLowerCase();
+
+        // --- SQL text -> SQLite binary ---
+        if (ext === "sql") {
+            setIsLoading(true);
+            try {
+                const sqlText = await file.text();
+                const SQL = await initSqlJs();
+                const database = new SQL.Database();
+
+                try {
+                    database.run(sqlText);
+                } catch (err) {
+                    alert(`Failed to execute SQL: ${(err as Error).message}`);
+                    setIsLoading(false);
+
+                    return;
+                }
+
+                const exported = database.export();
+
+                database.close();
+
+                const blob = new Blob([exported.buffer as ArrayBuffer], {
+                    type: "application/x-sqlite3",
+                });
+                const baseName = file.name.replace(/\.sql$/i, "");
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+
+                a.href = url;
+                a.download = `${baseName}.sqlite`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } finally {
+                setIsLoading(false);
+            }
+
+            return;
+        }
+
+        // --- SQLite binary → CSV / JSON / SQL ---
         const reader = new FileReader();
 
         console.debug(selectedKeys);
@@ -59,7 +140,19 @@ export default function Home() {
 
             if (tablesResult.length === 0) return;
 
-            const tableNames = tablesResult[0].values.flat() as string[];
+            const INTERNAL_TABLES = new Set([
+                "sqlite_sequence",
+                "sqlite_stat1",
+                "sqlite_stat2",
+                "sqlite_stat3",
+                "sqlite_stat4",
+            ]);
+            const tableNames = (
+                tablesResult[0].values.flat() as string[]
+            ).filter(
+                (name) =>
+                    !INTERNAL_TABLES.has(name) && !name.startsWith("sqlite_"),
+            );
 
             // Store files for later download
             const blobs: { name: string; blob: Blob }[] = [];
@@ -255,8 +348,9 @@ export default function Home() {
                             1. Upload SQLite File
                         </h2>
                         <div className="flex flex-col items-center gap-4">
+                            {/* TODO: Support JSON uploads eventually */}
                             <input
-                                accept=".db,.sqlite,.sqlite3"
+                                accept=".db,.sqlite,.sqlite3,.csv,.sql"
                                 className="hidden"
                                 id="file-upload"
                                 type="file"
@@ -270,7 +364,7 @@ export default function Home() {
                                     color: "var(--button-text-color)",
                                 }}
                             >
-                                <FaDatabase />
+                                <FiFile />
                                 Choose File
                             </label>
 
@@ -284,10 +378,10 @@ export default function Home() {
                             )}
                         </div>
 
-                        <p className="text-lg font-semibold mb-4 text-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent mt-4">
-                            Update: There is no upload limit anymore, it&apos;s
-                            all done in your browser! Better for security and
-                            privacy.
+                        <p className="font-semibold mb-4 text-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent mt-4">
+                            Supported formats: .db, .sqlite, .sqlite3 for SQLite
+                            files; .sql for SQL dump files. CSV and JSON uploads
+                            are not supported yet.
                         </p>
 
                         <div className="flex flex-col items-center gap-4 text-center">
@@ -299,6 +393,7 @@ export default function Home() {
                                     { key: "CSV", icon: <LuFileSpreadsheet /> },
                                     { key: "JSON", icon: <VscJson /> },
                                     { key: "SQL", icon: <FaDatabase /> },
+                                    { key: "SQLite", icon: <SiSqlite /> },
                                 ].map(({ key, icon }) => {
                                     const descriptions: {
                                         [key: string]: string;
@@ -306,12 +401,13 @@ export default function Home() {
                                         CSV: "Comma-Separated Values",
                                         JSON: "JavaScript Object Notation",
                                         SQL: "Structured Query Language",
+                                        SQLite: "SQLite Database File. Not the same as .sql",
                                     };
 
                                     return (
                                         <label
                                             key={key}
-                                            className={`flex items-center gap-2 px-4 py-2 rounded cursor-pointer transition ${
+                                            className={`${disabledKeys.has(key) ? "opacity-50 cursor-not-allowed" : ""} flex items-center gap-2 px-4 py-2 rounded cursor-pointer transition ${
                                                 selectedKeys.has(key)
                                                     ? "bg-green-700 text-white hover:bg-green-800"
                                                     : "bg-[var(--button-bg)] text-white hover:bg-blue-800"
@@ -325,6 +421,8 @@ export default function Home() {
                                                 type="checkbox"
                                                 value={key}
                                                 onChange={() => {
+                                                    if (disabledKeys.has(key))
+                                                        return;
                                                     const newSelectedKeys =
                                                         new Set(selectedKeys);
 
@@ -351,7 +449,7 @@ export default function Home() {
                                     );
                                 })}
                             </div>
-                            <p className="text-lg font-semibold mb-4 text-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent mt-4">
+                            <p className="font-semibold mb-4 text-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent mt-4">
                                 Note: Selecting multiple formats or choosing the
                                 CSV option, you&apos;ll get a zip file with all
                                 the files you want.
@@ -363,11 +461,17 @@ export default function Home() {
                                 3. Convert!
                             </h2>
                             <button
-                                className="px-6 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2 mb-4"
+                                // Keep disabled until we have a file and at least one format selected
+                                className={`${selectedKeys.size === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600"} px-6 py-2 rounded transition inline-flex items-center gap-2 mb-4`}
                                 style={{
                                     backgroundColor: "var(--button-bg)",
                                     color: "var(--button-text-color)",
                                 }}
+                                title={
+                                    selectedKeys.size === 0
+                                        ? "Please select at least one output format"
+                                        : "Convert your file to the selected format(s)"
+                                }
                                 type="button"
                                 onClick={handleUpload}
                             >

@@ -1,6 +1,7 @@
 import { SiSqlite, SiGithub } from "react-icons/si";
 import { FaHome, FaFileExport } from "react-icons/fa";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 const Navbar: React.FC = () => {
     const [isMobile, setIsMobile] = useState(false);
@@ -24,7 +25,7 @@ const Navbar: React.FC = () => {
                         <SiSqlite />
                         {!isMobile && "SQLite Reader"}
                     </h1>
-                    <a
+                    <Link
                         className="px-4 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2"
                         href="/"
                         style={{
@@ -35,8 +36,8 @@ const Navbar: React.FC = () => {
                     >
                         <FaHome />
                         Home
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                         className="px-4 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2"
                         href="/convert"
                         style={{
@@ -47,8 +48,8 @@ const Navbar: React.FC = () => {
                     >
                         <FaFileExport />
                         Convert
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                         className="px-4 py-2 rounded hover:bg-blue-600 transition inline-flex items-center gap-2"
                         href="https://github.com/GalvinPython/sqlite-viewer"
                         rel="noopener noreferrer"
@@ -61,7 +62,7 @@ const Navbar: React.FC = () => {
                     >
                         <SiGithub />
                         {isMobile ? "GitHub" : "View on GitHub"}
-                    </a>
+                    </Link>
                 </div>
             </div>
         </header>

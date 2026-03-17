@@ -27,6 +27,7 @@ export default tseslint.config(
             "coverage/**",
             ".next/**",
             "build/**",
+            "out/**",
         ],
     },
     eslint.configs.recommended,

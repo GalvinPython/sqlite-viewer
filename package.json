@@ -8,8 +8,9 @@
         "start": "serve out -l 8010",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
-        "updatesql": "cp ./node_modules/sql.js/dist/sql-wasm.wasm ./public/sql-wasm.wasm",
-        "embed": "bun embed.ts"
+        "updatesql": "cp ./node_modules/sql.js/dist/sql-wasm.wasm ./public/sql-wasm.wasm && cp ./node_modules/sql.js/dist/sql-wasm-browser.wasm ./public/sql-wasm-browser.wasm",
+        "embed": "bun embed.ts",
+        "generate-test-data": "bun generate-test-data.ts"
     },
     "dependencies": {
         "@million/lint": "^1.0.14",
