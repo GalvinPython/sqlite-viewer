@@ -5,9 +5,8 @@
     "scripts": {
         "dev": "next dev --port 3003",
         "build": "next build",
-        "start": "next start -p 8010",
-        "lint": "next lint",
-        "lint:fix": "next lint --fix",
+        "start": "serve out -l 8010",
+        "embed": "bun embed.ts",
         "updatesql": "cp ./node_modules/sql.js/dist/sql-wasm.wasm ./public/sql-wasm.wasm"
     },
     "dependencies": {
