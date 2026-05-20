@@ -1,18 +1,8 @@
 # dependencies
-/node_modules
+node_modules/
 
 # next.js
-/.next/
-
-# million
-.million/
-
-# other stuff
-ads.txt
-
-# private testing stuff :p
-h.ts
-*.sqlite3
+.next/
 
 # build
-out/
+/out/
