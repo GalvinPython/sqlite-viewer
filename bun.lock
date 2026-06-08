@@ -8,7 +8,7 @@
         "jszip": "^3.10.1",
         "next": "16.2.6",
         "react": "^19.2.6",
-        "react-dom": "^19.2.6",
+        "react-dom": "^19.2.7",
         "react-icons": "^5.6.0",
         "sql.js": "1.14.1",
       },
@@ -316,7 +316,7 @@
 
     "react": ["react@19.2.6", "", {}, ""],
 
-    "react-dom": ["react-dom@19.2.6", "", { "dependencies": { "scheduler": "^0.27.0" }, "peerDependencies": { "react": "^19.2.6" } }, ""],
+    "react-dom": ["react-dom@19.2.7", "", { "dependencies": { "scheduler": "^0.27.0" }, "peerDependencies": { "react": "^19.2.7" } }, "sha512-t0BRVXvbiE/o20Hfw669rLbMCDWtYZLvmJigy2f0MxsXF+71pxhR3xOkspmsO8h3ZlNzyibAmtCa3l4lYKk6gQ=="],
 
     "react-icons": ["react-icons@5.6.0", "", { "peerDependencies": { "react": "*" } }, ""],
 
